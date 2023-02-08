@@ -11,6 +11,11 @@ public class Screen extends JPanel {
     JFrame frame;
     Stack_Layout stack;
     List<MouseEvent_Edited> mouse_events;
+    
+    Command external_drawer;
+    Graphics current_graphics = null;
+    Mouse mouse;
+    Point mouse_point;
     public Screen(int width, int height){
         mouse_events = new ArrayList<>();
         frame = new JFrame();
@@ -26,7 +31,7 @@ public class Screen extends JPanel {
 
         stack = new Stack_Layout(0, 0, width, height);
     
-        Mouse mouse = new Mouse();
+        mouse = new Mouse();
         this.addMouseListener(mouse);
 
     }
@@ -39,8 +44,7 @@ public class Screen extends JPanel {
         return stack;
     }
 
-    Command external_drawer;
-    Graphics current_graphics = null;
+    
     protected void paintComponent(Graphics grf) {
         current_graphics = grf;
         super.paintComponent(grf);
@@ -69,15 +73,32 @@ public class Screen extends JPanel {
     }
     
     public synchronized void add_mouse_event(MouseEvent_Edited e){
-        mouse_events.add(e);
-        if(observe(e)){
-            //System.out.println("child recieved event");
-            //for now we commit the event right away, later with commit the event during the tick
-            e.observer.onClicked(e);
+        //System.out.println("adding event");
+        if(e == null){
+            System.out.println("it gave us a null event");
+            return;
         }
+        
+        mouse_events.add(e);
         //System.out.println("did not recieve event");
-        
-        
+    }
+    
+    public synchronized MouseEvent_Edited pop_mouse_event(){
+        if(mouse_events.size() != 0)
+            return mouse_events.remove(mouse_events.size() - 1);
+        return null;
+    }
+    public synchronized void pop_mouse_event_to_observe(){
+        if(mouse_events.size() == 0)
+            return;
+        //System.out.println("popping event to observe");
+        if(mouse_events.size() != 0){
+            MouseEvent_Edited event = mouse_events.remove(mouse_events.size() - 1);
+            boolean found = observe(event);
+            if(found){
+                event.observer.onMouseEvent(event);
+            }
+        }
     }
     
     private boolean observe(MouseEvent_Edited event){
@@ -85,6 +106,7 @@ public class Screen extends JPanel {
     }
     
     public void update_screen(){
+        mouse_point = MouseInfo.getPointerInfo().getLocation();
         frame.repaint();
     }
 }

@@ -15,14 +15,16 @@ public class Mouse implements MouseListener {
 	
 	@Override
 	public void mousePressed(MouseEvent e) {
-		
 		//System.out.println("pressed" + getInfoFromMouse(e));
+		MouseEvent_Edited event = new MouseEvent_Edited(e, MouseEvent_Edited.type_pressed);
+		parent.add_mouse_event(event);
 	}
 	
 	@Override
 	public void mouseReleased(MouseEvent e) {
-		
 		//System.out.println("released" + getInfoFromMouse(e));
+		MouseEvent_Edited event = new MouseEvent_Edited(e, MouseEvent_Edited.type_released);
+		parent.add_mouse_event(event);
 	}
 	
 	@Override

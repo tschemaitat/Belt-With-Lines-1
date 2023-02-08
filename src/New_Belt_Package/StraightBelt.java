@@ -9,13 +9,22 @@ public class StraightBelt extends Belt {
     boolean rightBelt;
     boolean leftBelt;
 
-    public StraightBelt(int orientation, int[] oAround, int x, int y) {
-        super(orientation, oAround, x, y);
+    public StraightBelt(int orientation, int[] oAround, int x, int y, int grid_x, int grid_y) {
+        super(orientation, oAround, x, y, grid_x, grid_y);
+        setAroundBooleans(oAround);
+        shape = straight;
+        shift_item_locations();
+    }
+    
+    private void setAroundBooleans(int[] oAround){
         backBelt = false;
         rightBelt = false;
         leftBelt = false;
         if(oAround[(down + orientation)%4] == (up + orientation)%4){
             backBelt = true;
+            if(arrayIndex == 19){
+                System.out.println("BACKBELT IS TRUE");
+            }
         }
         if(oAround[(left + orientation)%4] == (right + orientation)%4){
             leftBelt = true;
@@ -23,8 +32,6 @@ public class StraightBelt extends Belt {
         if(oAround[(right + orientation)%4] == (left + orientation)%4){
             rightBelt = true;
         }
-        shape = straight;
-        shift_item_locations();
     }
 
 
@@ -45,10 +52,23 @@ public class StraightBelt extends Belt {
         return items_per_side_straight;
     }
     
-    public boolean getInputPriorityAndSide(Belt belt, int side, IntWrap newSide, IntWrap newPosition){
+    public boolean getInputPriorityAndSide(Belt belt, int side, IntWrap newSide, IntWrap newPosition, BooleanWrap can_output){
+        setAroundBooleans(getoAround());
+        
+        if(belt != beltsAround((up + orientation)%4)){
+            can_output.set(true);
+        }
+        else{
+            can_output.set(false);
+            System.out.println(this.arrayIndex + " setting can_output to false");
+        }
+        
+        
+        
+        
         int direction = 0;
         for(int i = 0; i < 4; i++){
-            if(beltsAround[i] == belt){
+            if(beltsAround(i) == belt){
                 direction = i;
                 break;
             }
@@ -83,38 +103,29 @@ public class StraightBelt extends Belt {
     }
 
     public Belt getInputBeltAndSide(int side, IntWrap newSide){
+        setAroundBooleans(getoAround());
         //if we have a back belt, the priority input is the like sides of that back belt
         if(backBelt){
             newSide.value = side;
             //System.out.println("Straight belt going strsight behind");
-            return beltsAround[(down + orientation)%4];
+            return beltsAround((down + orientation)%4);
         }
         //if left belt, our priority input on the left will be that left belt and comes from the right side
         if(side == 0 && leftBelt){
             newSide.value = 1;
             //System.out.println("Straight belt going left");
-            return beltsAround[(left + orientation)%4];
+            return beltsAround((left + orientation)%4);
         }
         if(side == 1 && rightBelt){
             newSide.value = 0;
             //System.out.println("Straight belt going left");
-            return beltsAround[(right + orientation)%4];
+            return beltsAround((right + orientation)%4);
         }
         //for a given side, we do not have a priority input
         //System.out.println("Straight belt no input");
         return null;
     }
     //64/(4*2) = 8  64-8-2=54
-
-    public void linkBelts(Belt[] belts){
-        super.linkBelts(belts);
-        if(belts[2] != null)
-            backBelt = true;
-        if(belts[0] != null)
-            rightBelt = true;
-        if(belts[3] != null)
-            leftBelt = true;
-    }
 
     public int getLengthFromSide(int side){
         return 4;

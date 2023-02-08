@@ -12,7 +12,7 @@ public class Main {
 	public static void belt_game(){
 		//customize_print();
 		Screen screen = new Screen(800, 800);
-		Manager manager = new Manager();
+		Manager manager = new Manager(screen.get_parent_layout());
 		Graphics2D grf =  (Graphics2D)screen.get_graphics();
 		RenderingHints qualityHints = new RenderingHints(
 				RenderingHints.KEY_ANTIALIASING,
@@ -23,19 +23,21 @@ public class Main {
 		grf.setRenderingHints( qualityHints );
 		
 		//do_ticks(manager, grf);
-		manager.build_lists();
-		manager.draw_Items_In_Belts_Old(grf);
-		manager.draw_belt_lines(grf);
-		manager.add_items_to_lists();
 		
-		do_ticks(manager, grf);
+		
+		
+		
+		//manager.draw_Items_In_Belts_Old(grf);
+		//manager.draw_belt_lines(grf);
+		
+		do_ticks(manager, grf, screen);
 		
 	}
 	static int tick = 0;
-	public static void do_ticks(Manager manager, Graphics grf){
+	public static void do_ticks(Manager manager, Graphics grf, Screen screen){
 		while(1==1){
 			try {
-				Thread.sleep(20);
+				Thread.sleep(50);
 			} catch (InterruptedException e) {
 				throw new RuntimeException(e);
 			}
@@ -49,17 +51,16 @@ public class Main {
 			g_buffer.setColor(Color.gray);
 			g_buffer.fillRect(0, 0, 800, 800);
 			//manager.draw_Items_In_Belts_Old(g_buffer);
+			screen.pop_mouse_event_to_observe();
 			
 			if(tick%4 == 0)
 				manager.iterate_belt_lists();
 			int iteration_into_tick = tick%4;//0,1,2,3
 			int graphical_iteration = (4-1) - iteration_into_tick;
-			manager.draw_belts(g_buffer);
-			manager.draw_belt_lines(g_buffer);
-			manager.draw_items_in_list(g_buffer, graphical_iteration);
+			manager.graphical_iteration = graphical_iteration;
+			screen.update_screen();
 			
-			
-			grf.drawImage(buffer, 0, 0, null);
+			//grf.drawImage(buffer, 0, 32, null);
 			tick++;
 		}
 	}

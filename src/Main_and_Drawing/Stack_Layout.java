@@ -19,7 +19,7 @@ public class Stack_Layout extends Layout {
         }
     }
     
-    protected boolean observe(MouseEvent_Edited event){
+    public boolean observe(MouseEvent_Edited event){
         if(list.size() == 0)
             return false;
         for(int i = 0; i < list.size(); i++){
@@ -44,22 +44,9 @@ public class Stack_Layout extends Layout {
     
     
     @Override
-    public void onClicked(MouseEvent_Edited event) {
+    public void onMouseEvent(MouseEvent_Edited event) {
     
     }
     
-    @Override
-    public void onTouched(MouseEvent_Edited event) {
     
-    }
-    
-    @Override
-    public void onMouseDown(MouseEvent_Edited event) {
-    
-    }
-    
-    @Override
-    public void onMouseUp(MouseEvent_Edited event) {
-    
-    }
 }

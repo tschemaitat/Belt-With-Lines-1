@@ -59,18 +59,18 @@ public class Item_In_Belt {
 			}else{
 				//System.out.println("try new position");
 				moving_towards_a_position = false;
-				try_to_move_to_new_position();
+				//try_to_move_to_new_position();
 			}
 		}
 		//System.out.println("not moving");
 	}
-	
+	/*
 	private void try_to_move_to_new_position(){
 		int max_position = belt.max_items(side);
 		//if we are at the max position
 		if(position == max_position - 1){
 			//System.out.println("try new belt");
-			Belt new_belt = belt.beltsAround[belt.orientation];
+			Belt new_belt = belt.beltsAround(belt.orientation);
 			if(new_belt == null){
 				//System.out.println("no new belt");
 				moving_towards_a_position = false;
@@ -99,4 +99,5 @@ public class Item_In_Belt {
 			moving_towards_a_position = true;
 		}
 	}
+	*/
 }

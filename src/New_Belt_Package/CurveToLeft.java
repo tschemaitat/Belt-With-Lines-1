@@ -3,14 +3,13 @@ package New_Belt_Package;
 import New_Belt_Package.Belt;
 import New_Belt_Package.IntWrap;
 
-import static New_Belt_Package.First.Enum.curveToLeft;
-import static New_Belt_Package.First.Enum.left;
+import static New_Belt_Package.First.Enum.*;
 import static New_Belt_Package.First.Images.*;
 
 public class CurveToLeft extends Belt {
 
-    public CurveToLeft(int orientation, int[] oAround, int x, int y) {
-        super(orientation, oAround, x, y);
+    public CurveToLeft(int orientation, int[] oAround, int x, int y, int grid_x, int grid_y) {
+        super(orientation, oAround, x, y, grid_x, grid_y);
         shape = curveToLeft;
         shift_item_locations();
     }
@@ -31,7 +30,13 @@ public class CurveToLeft extends Belt {
         }
     }
 
-    public boolean getInputPriorityAndSide(Belt belt, int side, IntWrap newSide, IntWrap newPosition){
+    public boolean getInputPriorityAndSide(Belt belt, int side, IntWrap newSide, IntWrap newPosition, BooleanWrap can_output){
+        if(belt == beltsAround((left + orientation)%4))
+            can_output.set(true);
+        else
+            can_output.set(false);
+        
+        
         newPosition.value = 0;
         newSide.value = side;
         return true;
@@ -39,7 +44,7 @@ public class CurveToLeft extends Belt {
 
     public Belt getInputBeltAndSide(int side, IntWrap newSide){
         newSide.value = side;
-        return beltsAround[(left + orientation)%4];
+        return beltsAround((left + orientation)%4);
     }
 
 

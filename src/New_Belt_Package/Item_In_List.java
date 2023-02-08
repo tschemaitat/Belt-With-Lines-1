@@ -5,7 +5,7 @@ import java.awt.image.BufferedImage;
 
 public class Item_In_List {
 	private BufferedImage image;
-	public String name;
+	String name;
 	public boolean empty;
 	
 	public Item_In_List(String name, BufferedImage image){

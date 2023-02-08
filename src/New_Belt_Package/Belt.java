@@ -20,11 +20,13 @@ abstract public class Belt {
     BufferedImage image;
     int shape;
     int orientation;
-    Belt[] beltsAround;
     int x;
     int y;
+    
+    int grid_row;
+    int grid_column;
     boolean[] checked_side_for_list;
-    int[] list_from_side;
+    private List<Belt_List> list_from_side;
     int arrayIndex;
     int[][][] itemCordShifted;
     
@@ -34,21 +36,95 @@ abstract public class Belt {
     static int[][][] straightCordRelative;
     
     static boolean setup = false;
-
-    public Belt(int orientation, int[] oAround, int x, int y) {
-        beltsAround = new Belt[4];
+    static int belt_count = 0;
+    public Belt(int orientation, int[] oAround, int x, int y, int grid_row, int grid_column) {
+        System.out.println("("+grid_row+","+grid_column+") making belt: " + belt_count + " @@@@@@@@@@@@@@@@@@@");
+        shape = -1;
+        arrayIndex = belt_count;
+        this.grid_row = grid_row;
+        this.grid_column = grid_column;
         this.orientation = orientation;
         this.x = x;
         this.y = y;
         setImage();
         checked_side_for_list = new boolean[]{false,false};
         itemCordShifted = new int[items_per_belt*iterations_per_position][2][2];
-        list_from_side = new int[2];
+        list_from_side = new ArrayList<>();
+        list_from_side.add(null);
+        list_from_side.add(null);
         if(!setup){
             setup = true;
             setup();
         }
+        belt_count++;
+        System.out.println(belt_count);
     }
+    
+    public Belt beltsAround(int direction){
+        return Manager.beltGrid[grid_row + Manager.diff[direction][0]][grid_column + Manager.diff[direction][1]];
+    }
+    
+    public Belt[] getBeltsAround(){
+        Belt[] belt_around = new Belt[4];
+        for(int i = 0; i < 4; i++){
+            belt_around[i] = Manager.beltGrid[grid_row + Manager.diff[i][0]][grid_column + Manager.diff[i][1]];
+        }
+        return belt_around;
+    }
+    
+    public void add_to_list(int side, Belt_List list){
+        checked_side_for_list[side] = true;
+        list_from_side.remove(side);
+        list_from_side.add(side, list);
+    }
+    
+    public void remove_list(int side){
+        checked_side_for_list[side] = false;
+        list_from_side.remove(side);
+        list_from_side.add(side, null);
+    }
+    
+    
+    
+    public boolean changed_shape(){
+        int[] around = beltToIntAround(getBeltsAround());
+        
+        int new_shape = checkBeltType(orientation, around);
+        if(new_shape != shape){
+            return true;
+        }
+        return false;
+    }
+    
+    public int[] getoAround(){
+        return beltToIntAround(getBeltsAround());
+    }
+    public String oAroundString(){
+        int[] oAround = getoAround();
+        String s = "(";
+        for(int i = 0; i < 4; i++){
+            s += oAround[i];
+            if(i != 3)
+                s += ", ";
+        }
+        s += ")";
+        return s;
+    }
+    
+    public static int[] beltToIntAround(Belt[] beltsAround){
+        int[] around = new int[4];
+        for(int i = 0; i < beltsAround.length; i++){
+            if(beltsAround[i] == null){
+                around[i] = -1;
+                continue;
+            }
+        
+            around[i] = beltsAround[i].orientation;
+        }
+        return around;
+    }
+    
+    
     
     public abstract int max_items(int side);
     
@@ -99,8 +175,8 @@ abstract public class Belt {
         
     }
     
-    public int get_list_from_side(int side){
-        return list_from_side[side];
+    public Belt_List get_list_from_side(int side){
+        return list_from_side.get(side);
     }
 
     public int[][] get_line(int side){
@@ -112,14 +188,19 @@ abstract public class Belt {
         return line;
     }
     
-    public static Belt makeBelt(int orientation, int[] oAround, int x, int y){
+    public Belt_List get_list(int side){
+        return list_from_side.get(side);
+    }
+    
+    public static Belt makeBelt(int orientation, int[] oAround, int x, int y, int grid_x, int grid_y){
+        
         int shape = checkBeltType(orientation, oAround);
         switch(shape){
-            case straight: return new StraightBelt(orientation, oAround, x, y);
-            case curveToLeft: return new CurveToLeft(orientation, oAround, x, y);
-            case curveToRight: return new CurveToRight(orientation, oAround, x, y);
+            case straight: return new StraightBelt(orientation, oAround, x, y, grid_x, grid_y);
+            case curveToLeft: return new CurveToLeft(orientation, oAround, x, y, grid_x, grid_y);
+            case curveToRight: return new CurveToRight(orientation, oAround, x, y, grid_x, grid_y);
         }
-        return new StraightBelt(orientation, oAround, x, y);
+        return new StraightBelt(orientation, oAround, x, y, grid_x, grid_y);
     }
     
     public int[] get_item_location(int iteration, int side){
@@ -175,7 +256,7 @@ abstract public class Belt {
 
     abstract public void setImage();
 
-    abstract public boolean getInputPriorityAndSide(Belt belt, int side, IntWrap newSide, IntWrap newPosition);
+    abstract public boolean getInputPriorityAndSide(Belt belt, int side, IntWrap newSide, IntWrap newPosition, BooleanWrap can_output);
     abstract public Belt getInputBeltAndSide(int side, IntWrap newSide);
 
     abstract public int getLengthFromSide(int side);
@@ -185,15 +266,12 @@ abstract public class Belt {
             return this.x + xMatrix[orientation][0] * x + xMatrix[orientation][1] * y + rotateOffsetMatrix[orientation][0] * 64 - 16;
         return this.y + yMatrix[orientation][0] * x + yMatrix[orientation][1] * y + rotateOffsetMatrix[orientation][1] * 64 - 16;
     }
-    public void linkBelts(Belt [] belts){
-        beltsAround = belts;
-    }
 
     @Override
     public String toString() {
         String num = String.valueOf(arrayIndex);
-        String className = this.getClass().getSimpleName();
-        return className + " " + num;
+        String shape = Belt.shape_from_int(this.shape);
+        return shape + " " + num;
     }
     
     
@@ -212,6 +290,10 @@ abstract public class Belt {
             y = initial - i * Ychange;
             itemCord[i][0][0] = x;
             itemCord[i][0][1] = y;
+            //[pos][side][xy]
+            //4 per side, 4 iter per pos
+            //[16][2][2]
+            //(pos 1, 0), (pos 2, 3)
         
             x = length - horizontalItemPosition;
             //y = initial - i * Ychange;
@@ -323,6 +405,27 @@ abstract public class Belt {
             itemCord[i][side][0] = x;
             itemCord[i][side][1] = y;
         }
+    }
+    
+    public static int get_direction(int y, int x){
+        if(x == 0){
+            if(y == 1)
+                return down;
+            return up;
+        }
+        if(x == 1)
+            return right;
+        return left;
+    }
+    
+    public static String shape_from_int(int shape){
+        if(shape == straight)
+            return "st";
+        if(shape == curveToLeft)
+            return "cl";
+        if(shape == curveToRight)
+            return "cr";
+        return "NAN";
     }
 
 

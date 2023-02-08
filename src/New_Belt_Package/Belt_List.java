@@ -17,10 +17,32 @@ public class Belt_List {
 	private List<Integer> belt_position_from_position;
 	private List<Item_In_List> items;
 	private int amount_positions;
+	public boolean has_iterated = false;
+	public int current_iteration_id = -1;
 	
-	private Belt output_belt;
-	private int output_side;
-	private int output_position;
+	private List<Belt> log_order_of_belts_added = new ArrayList<>();
+	
+	List<Belt_List> input_lists = new ArrayList<>();
+	/*
+	additem() O(n)
+	iterate() O(n)
+	
+	list
+	add O(n)
+	iterate O(1)
+	
+	//0204510101010
+	//101..
+	
+	//204510
+	
+	array
+	add O(1)
+	iterate O(n)
+	
+	
+	*/
+	private LocationStruct output_locationStruct;
 	
 	private List<Belt_List> belt_lists;
 	
@@ -33,30 +55,34 @@ public class Belt_List {
 		sides = new ArrayList<>();
 	}
 	
+	public void log_input_list(Belt_List list){
+		input_lists.add(list);
+	}
+	
 	//region compilation
 	public void add_belt_front(Belt belt, int side){
 		belts.add(belt);
 		sides.add(side);
-		belt.checked_side_for_list[side] = true;
-		belt.list_from_side[side] = self_index;
-		
+		belt.add_to_list(side, this);
+		log_order_of_belts_added.add(belt);
 	}
 	
 	public void add_belt_behind(Belt belt, int side){
 		belts.add(0, belt);
 		sides.add(0, side);
-		belt.checked_side_for_list[side] = true;
-		belt.list_from_side[side] = self_index;
+		belt.add_to_list(side, this);
+		log_order_of_belts_added.add(belt);
 	}
 	
 	public void set_output(Belt b, int s, int p){
-		output_belt = b;
-		output_side = s;
-		output_position = p;
+		output_locationStruct = new LocationStruct(p, s, b);
+		
+		
+		
 	}
 	
 	public void compile(){
-		System.out.println("list ("+size()+") compiling~~~~~~~~~~~~~~~~");
+		//System.out.println("list ("+size()+") compiling~~~~~~~~~~~~~~~~");
 		List<int[][]> cords_as_list = new ArrayList<>();
 		belts_from_position = new ArrayList<>();
 		side_from_position = new ArrayList<>();
@@ -73,7 +99,7 @@ public class Belt_List {
 		int index_list_position = 0;
 		int list_index_start_of_belt = 0;
 		for(int index_belt = belts.size() - 1; index_belt >= 0; index_belt--){
-			System.out.println("index_starting at belt("+index_belt+"): "+list_index_start_of_belt);
+			//System.out.println("index_starting at belt("+index_belt+"): "+list_index_start_of_belt);
 			Belt belt = belts.get(index_belt);
 			int side = sides.get(index_belt);
 			Belt backward_belt;
@@ -91,7 +117,7 @@ public class Belt_List {
 			
 			for(int index_position_in_belt = belt.max_items(side) - 1; index_position_in_belt >= 0; index_position_in_belt--){
 				int list_index_start_of_position = list_index_start_of_belt + (belt.max_items(side) - 1) - index_position_in_belt;
-				System.out.println("index_starting at position("+index_position_in_belt+"): "+list_index_start_of_position);
+				//System.out.println("index_starting at position("+index_position_in_belt+"): "+list_index_start_of_position);
 				int[][] position_cords = new int[Belt.iterations_per_position][2];
 				//the position we get 1 coordinate from
 				Belt position_current_belt = belt;
@@ -123,7 +149,7 @@ public class Belt_List {
 				if(index_position_in_belt == 0){
 					position_backwards_belt = backward_belt;
 					position_backwards_position = backward_belt.max_items(backward_side) - 1;
-					System.out.println("max backwards position: " + position_backwards_position);
+					//System.out.println("max backwards position: " + position_backwards_position);
 					position_backwards_side = backward_side;
 				} else{
 					position_backwards_belt = belt;
@@ -141,18 +167,18 @@ public class Belt_List {
 					temp_cord = position_backwards_belt.get_item_location(position_backwards_position*iter_per_position + iteration_between_position, position_backwards_side);
 					position_cords[current_index][0] = temp_cord[0];// + Belt.itemSize/2;
 					position_cords[current_index][1] = temp_cord[1];// + Belt.itemSize/2;
-					System.out.println("adding iteration: "+iteration_between_position + " at index: "+(iter_per_position - iteration_between_position));
+					//System.out.println("adding iteration: "+iteration_between_position + " at index: "+(iter_per_position - iteration_between_position));
 				}
 				
 				cords_as_list.add(position_cords);
 				belts_from_position.add(belt);
 				side_from_position.add(sides.get(index_belt));
 				belt_position_from_position.add(index_position_in_belt);
-				System.out.print("position array: ");
+				//System.out.print("position array: ");
 				for(int i = 0; i < position_cords.length; i++){
-					System.out.print("("+position_cords[i][0]+", "+position_cords[i][1] + ") ");
+					//System.out.print("("+position_cords[i][0]+", "+position_cords[i][1] + ") ");
 				}
-				System.out.println();
+				//System.out.println();
 				
 				
 				
@@ -171,17 +197,49 @@ public class Belt_List {
 		
 	}
 	
+	public void second_compile(){
+		if(output_locationStruct.belt == null)
+			return;
+		get_list_output().log_input_list(this);
+	}
 	//endregion
+	
+	public List<ItemLocationStruct> delete(){
+		//System.out.println("deleting " + self_index);
+		List<ItemLocationStruct> temp_item_list = new ArrayList<>();
+		for(int i = 0; i < items.size(); i++){
+			if(items.get(i).empty)
+				continue;
+			Item_In_List item = items.get(i);
+			int position_in_belt = belt_position_from_position.get(i).intValue();
+			int side = side_from_position.get(i).intValue();
+			Belt belt = belts_from_position.get(i);
+			temp_item_list.add(new ItemLocationStruct(item, position_in_belt, side, belt));
+		}
+		for(int i = 0; i < belts.size(); i++){
+			belts.get(i).remove_list(sides.get(i));
+		}
+		for(int i = 0; i < input_lists.size(); i++){
+			input_lists.get(i).set_output(null, -1, -1);
+		}
+		return temp_item_list;
+	}
+	
+	
 	
 	//region strings
 	
 	public String toString(){
-		String result = "";
+		String result = ""+self_index;
 		for(int i = 0; i < belts.size(); i++){
-			result += "(belt: " + belts.get(i);
-			result += ", side: " + sides.get(i) + ")";
+			result += "(b:" + belts.get(i);
+			result += ", s:" + sides.get(i) + ")";
 			if(i != belts.size() - 1)
 				result+= ", ";
+		}
+		result+="\nlog: ";
+		for(int i = 0; i < log_order_of_belts_added.size(); i++){
+			result += log_order_of_belts_added.get(i).arrayIndex + ", ";
 		}
 		return result;
 	}
@@ -315,13 +373,14 @@ public class Belt_List {
 		return true;
 	}
 	
-	public int get_list_position_from_beltPositionSide(Belt belt, int position, int side){
+	public int get_list_position_from_beltPositionSide(LocationStruct location){
 		int belt_index = -1;
 		for(int i = 0; i < belts_from_position.size(); i++){
-			if(belts_from_position.get(i) == belt && belt_position_from_position.get(i) == position && side_from_position.get(i) == side){
+			if(belts_from_position.get(i) == location.belt && belt_position_from_position.get(i) == location.position && side_from_position.get(i) == location.side){
 				belt_index = i;
 			}
 		}
+		System.out.println("could not find location belt: "+location.belt+", pos: " + location.position + ", side: "+location.side);
 		return belt_index;
 	}
 	
@@ -337,7 +396,19 @@ public class Belt_List {
 		return true;
 	}
 	
-	public void iterate_items(){
+	public boolean is_last_item(int position){
+		if(position == items.size() - 1)
+			return true;
+		return false;
+	}
+	
+	public int iterate_items(int iteration_id){
+		moving_at_and_after_this_index = items.size();
+		if(has_iterated)
+			return -1;
+		//System.out.println("iterating items");
+		has_iterated = true;
+		current_iteration_id = iteration_id;
 		/*
 		if(self_index != 0){
 			moving_at_and_after_this_index = 0;
@@ -345,17 +416,18 @@ public class Belt_List {
 		}
 		*/
 		
-		System.out.println("iterating items: ");
+		//System.out.println("iterating items: ");
 		if(items.size() == 0){
-			System.out.println("just empty list");
+			//System.out.println("just empty list");
 			moving_at_and_after_this_index = 0;
-			return;
+			
+			return -1;
 		}
 		if(items.get(0).empty){
-			System.out.println("all push because empty at front");
+			//System.out.println("all push because empty at front");
 			items.remove(0);
 			moving_at_and_after_this_index = 0;
-			return;
+			return 1;
 		}
 		moving_at_and_after_this_index = cords.length;
 		//if there is empty spot at front, just push all items
@@ -383,22 +455,55 @@ public class Belt_List {
 			items.remove(0);
 			if(index_pushed_at != -1)
 				items.add(index_pushed_at - 1, Item_In_List.new_empty());
-			return;
+			return 1;
 		}
+		//Belt_List list_output = output_locationStruct.belt.get_list_from_side(output_locationStruct.side);
+		//int output_list_position = list_output.get_list_position_from_beltPositionSide(output_locationStruct);
+		
+		//if(list_output.is_last_item(output_list_position)){
+		//	return 1;
+		//}
+		
+		return 0;
+		
+		/*
+		if(output_locationStruct.belt == null)
+			return;
+		Belt_List list_output = output_locationStruct.belt.get_list_from_side(output_locationStruct.side);
+		int output_list_position = list_output.get_list_position_from_beltPositionSide(output_locationStruct);
+		if(list_output.current_iteration_id == iteration_id){
+			if(output_list_position == list_output.items.size() - 1){
+				System.out.println("found circle");
+				moving_at_and_after_this_index = 0;
+			}
+		}
+		 */
 		//System.out.println("did not push to output moving index: " + moving_at_and_after_this_index + "index pushed at: " + index_pushed_at);
 	}
 	
 	public boolean push_to_output(Item_In_List item){
-		if(output_belt == null)
+		//System.out.println("push to output");
+		if(output_locationStruct.belt == null)
 			return false;
-		int output_list_index = output_belt.get_list_from_side(output_side);
-		Belt_List list_output = belt_lists.get(output_list_index);
-		int output_list_position = list_output.get_list_position_from_beltPositionSide(output_belt, output_position, output_side);
+		Belt_List list_output = output_locationStruct.belt.get_list_from_side(output_locationStruct.side);
+		int output_list_position = list_output.get_list_position_from_beltPositionSide(output_locationStruct);
+		if(!list_output.has_iterated){
+			//System.out.println("output list has iterated: "+ list_output.has_iterated + " so we are iterating it");
+			list_output.iterate_items(current_iteration_id);
+		}
 		if(list_output.has_item(output_list_position)){
+			//System.out.println("still has item, returning false");
 			return false;
 		}
+		//System.out.println("empty space, adding item");
 		list_output.add_item_by_position(output_list_position, item);
 		return true;
+	}
+	
+	public Belt_List get_list_output(){
+		if(output_locationStruct.belt == null)
+			return null;
+		return output_locationStruct.belt.get_list_from_side(output_locationStruct.side);
 	}
 	//endregion
 	
@@ -406,12 +511,19 @@ public class Belt_List {
 	public void draw_items(Graphics2D grf, int graphical_iteration){
 		if(items.size() != 0){
 			//System.out.println("drawing items, list index: " + self_index + " moving index: " + moving_at_and_after_this_index);
+			
+			/*
 			if(self_index == 0)
 			for(int i = 0; i < items.size(); i++){
 				System.out.println(items.get(i).name + ", " );
 			}
+			*/
 			
 		}
+		if(items.size() == 0)
+			return;
+		if(moving_at_and_after_this_index == -1)
+			moving_at_and_after_this_index = items.size();
 		
 		for(int i = 0; i < moving_at_and_after_this_index && i < items.size(); i++){
 			

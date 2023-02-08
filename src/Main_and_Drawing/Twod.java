@@ -8,6 +8,7 @@ import java.awt.*;
 public abstract class Twod {
 	protected int visibility = 1;
 	protected int UIvisibility = 1;
+	public String name = "";
 	
 	public static final int VISIBLE = 1;
 	public static final int INVISIBLE = 0;
@@ -103,7 +104,21 @@ public abstract class Twod {
 		return bounds.contains(x, y);
 	}
 	
-	protected abstract boolean observe(MouseEvent_Edited event);
+	public boolean observe(MouseEvent_Edited event){
+		//System.out.println("observing for twod: " + name);
+		//System.out.println("event is: "+event.x()+","+event.y()+" twod is at: " + getX() + ", " + getY() + " width/height: " + width+", " + height);
+		if(UIvisibility == 0)
+			return false;
+		int x = event.x();
+		int y = event.y();
+		if(inBounds(event.x(), event.y())){
+			//System.out.println("it is in bounds");
+			//System.out.println("got clicked");
+			event.observer = this;
+			return true;
+		}
+		return false;
+	}
 	
 	public abstract void draw(Graphics grf);
 	
@@ -136,8 +151,6 @@ public abstract class Twod {
 		this.layoutParameters = layoutParameters;
 	}
 	
-	public abstract void onClicked(MouseEvent_Edited event);
-	public abstract void onTouched(MouseEvent_Edited event);
-	public abstract void onMouseDown(MouseEvent_Edited event);
-	public abstract void onMouseUp(MouseEvent_Edited event);
+	public abstract void onMouseEvent(MouseEvent_Edited event);
+	
 }

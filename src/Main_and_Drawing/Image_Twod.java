@@ -30,18 +30,7 @@ public class Image_Twod extends Twod {
     
     
     
-    public boolean observe(MouseEvent_Edited event){
-        if(UIvisibility == 0)
-            return false;
-        int x = event.x();
-        int y = event.y();
-        if(inBounds(event.x(), event.y())){
-            //System.out.println("got clicked");
-            event.observer = this;
-            return true;
-        }
-        return false;
-    }
+    
     
     
     
@@ -51,7 +40,7 @@ public class Image_Twod extends Twod {
             drawable.draw(grf, this);
     }
     
-    public void onClicked(MouseEvent_Edited event){
+    public void onMouseEvent(MouseEvent_Edited event){
         if(onClick == null)
             return;
         onClick.execute();
