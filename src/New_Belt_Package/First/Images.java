@@ -1,6 +1,7 @@
 package New_Belt_Package.First;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
@@ -90,5 +91,18 @@ public class Images {
         final AffineTransformOp rotateOp = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
         rotateOp.filter(image,rotatedImage);
         return rotatedImage;
+    }
+    
+    public static BufferedImage setAlpha(BufferedImage image, int alpha) {
+        BufferedImage newImage = new BufferedImage(
+              image.getWidth(),
+              image.getHeight(),
+              BufferedImage.TYPE_INT_ARGB
+        );
+        Graphics2D g2d = (Graphics2D) newImage.createGraphics();
+        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) alpha / 255));
+        g2d.drawImage(image, 0, 0, null);
+        g2d.dispose();
+        return newImage;
     }
 }

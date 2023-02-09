@@ -12,7 +12,7 @@ public class Main {
 	public static void belt_game(){
 		//customize_print();
 		Screen screen = new Screen(800, 800);
-		Manager manager = new Manager(screen.get_parent_layout());
+		Manager manager = new Manager(screen.get_parent_layout(), screen);
 		Graphics2D grf =  (Graphics2D)screen.get_graphics();
 		RenderingHints qualityHints = new RenderingHints(
 				RenderingHints.KEY_ANTIALIASING,
@@ -43,15 +43,13 @@ public class Main {
 			}
 			//manager.iterate_items();
 			
-			
-			
-			
-			BufferedImage buffer = new BufferedImage(800, 800, BufferedImage.TYPE_4BYTE_ABGR);
+			BufferedImage buffer = new BufferedImage(1200, 800, BufferedImage.TYPE_4BYTE_ABGR);
 			Graphics2D g_buffer = (Graphics2D)buffer.getGraphics();
 			g_buffer.setColor(Color.gray);
 			g_buffer.fillRect(0, 0, 800, 800);
 			//manager.draw_Items_In_Belts_Old(g_buffer);
 			screen.pop_mouse_event_to_observe();
+			screen.observe_mouse_touch();
 			
 			if(tick%4 == 0)
 				manager.iterate_belt_lists();

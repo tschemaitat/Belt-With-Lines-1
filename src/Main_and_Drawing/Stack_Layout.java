@@ -10,19 +10,20 @@ public class Stack_Layout extends Layout {
         super(new RectP(x, y, width, height), null);
     }
     
-    protected void draw_custom(Graphics grf){
+    protected void draw_custom(Graphics2D grf){
         if(list.size() == 0)
             return;
         for(int i = 0; i < list.size(); i++){
             Twod obj = list.get(i);
             obj.draw(grf);
+            obj.drawBounds(grf);
         }
     }
     
     public boolean observe(MouseEvent_Edited event){
         if(list.size() == 0)
             return false;
-        for(int i = 0; i < list.size(); i++){
+        for(int i = list.size() - 1; i >= 0; i--){
             Twod obj = list.get(i);
             if(obj.observe(event))
                 return true;

@@ -38,7 +38,7 @@ abstract public class Belt {
     static boolean setup = false;
     static int belt_count = 0;
     public Belt(int orientation, int[] oAround, int x, int y, int grid_row, int grid_column) {
-        System.out.println("("+grid_row+","+grid_column+") making belt: " + belt_count + " @@@@@@@@@@@@@@@@@@@");
+        //System.out.println("("+grid_row+","+grid_column+") making belt: " + belt_count + " @@@@@@@@@@@@@@@@@@@");
         shape = -1;
         arrayIndex = belt_count;
         this.grid_row = grid_row;
@@ -57,7 +57,7 @@ abstract public class Belt {
             setup();
         }
         belt_count++;
-        System.out.println(belt_count);
+        //System.out.println(belt_count);
     }
     
     public Belt beltsAround(int direction){

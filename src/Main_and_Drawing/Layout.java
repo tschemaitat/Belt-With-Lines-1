@@ -76,7 +76,7 @@ public abstract class Layout extends Twod {
 	
 	public abstract boolean observe(MouseEvent_Edited event);
 	
-	public void draw(Graphics grf){
+	public void draw(Graphics2D grf){
 		for(int i = 0; i < list.size(); i++){
 			list.get(i).update();
 			//list.get(i).drawBounds(grf);
@@ -84,7 +84,7 @@ public abstract class Layout extends Twod {
 		draw_custom(grf);
 	}
 	
-	abstract protected void draw_custom(Graphics grf);
+	abstract protected void draw_custom(Graphics2D grf);
 	
 	public final void add(Twod twod){
 		if(has(twod)){
@@ -128,7 +128,7 @@ public abstract class Layout extends Twod {
 		
 		list.remove(obj);
 		//put it at top so it is observed last
-		list.add(obj);
+		list.add(0, obj);
 		//System.out.println(list.indexOf(obj));
 	}
 	

@@ -38,9 +38,9 @@ public class Button_Text extends Image_Twod {
 		//grf.drawRect(x, y, width, height);
 		if(visibility == VISIBLE){
 			if(rect_twod != null)
-				rect_twod.draw(grf);
+				rect_twod.draw((Graphics2D) grf);
 			if(text_twod != null){
-				text_twod.draw(grf);
+				text_twod.draw((Graphics2D) grf);
 				//System.out.println("drawing text");
 			}
 			

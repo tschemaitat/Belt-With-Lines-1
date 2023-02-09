@@ -23,7 +23,7 @@ public class StraightBelt extends Belt {
         if(oAround[(down + orientation)%4] == (up + orientation)%4){
             backBelt = true;
             if(arrayIndex == 19){
-                System.out.println("BACKBELT IS TRUE");
+                //System.out.println("BACKBELT IS TRUE");
             }
         }
         if(oAround[(left + orientation)%4] == (right + orientation)%4){

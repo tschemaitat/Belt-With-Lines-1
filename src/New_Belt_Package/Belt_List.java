@@ -19,6 +19,7 @@ public class Belt_List {
 	private int amount_positions;
 	public boolean has_iterated = false;
 	public int current_iteration_id = -1;
+	public String iteration_mode = "";
 	
 	private List<Belt> log_order_of_belts_added = new ArrayList<>();
 	
@@ -247,12 +248,20 @@ public class Belt_List {
 	public String belt_index_and_side(){
 		String result = "";
 		for(int i = 0; i < belts.size(); i++){
-			result += "(b: " + belts.get(i).arrayIndex;
-			result += ", s: " + sides.get(i) + ")";
+			result += "(" + belts.get(i).arrayIndex;
+			result += ", " + int_side_to_character(sides.get(i)) + ")";
 			if(i != belts.size() - 1)
 				result+= ", ";
 		}
 		return result;
+	}
+	
+	public String int_side_to_character(int side){
+		if(side == 0)
+			return "L";
+		if(side == 1)
+			return "R";
+		return "Nan";
 	}
 	
 	public String stack_belt_side_and_position(boolean include_new_lines){
@@ -266,6 +275,14 @@ public class Belt_List {
 			result += ("(belt: " + belt.arrayIndex + ", position: (" + cord_position[0]+","+cord_position[1]+"), side: "+side+"pos: " + belt_position_from_position.get(i) + ")");
 		}
 		result += "\nside list: " + sides;
+		return result;
+	}
+	
+	public String item_characters(){
+		String result = "";
+		for(int i = 0; i < items.size(); i++){
+			result += items.get(i).name.substring(0, 1);
+		}
 		return result;
 	}
 	
@@ -380,7 +397,8 @@ public class Belt_List {
 				belt_index = i;
 			}
 		}
-		System.out.println("could not find location belt: "+location.belt+", pos: " + location.position + ", side: "+location.side);
+		if(belt_index == -1)
+			System.out.println("could not find location belt: "+location.belt+", pos: " + location.position + ", side: "+location.side);
 		return belt_index;
 	}
 	
@@ -403,9 +421,11 @@ public class Belt_List {
 	}
 	
 	public int iterate_items(int iteration_id){
-		moving_at_and_after_this_index = items.size();
+		
 		if(has_iterated)
 			return -1;
+		
+		moving_at_and_after_this_index = items.size();
 		//System.out.println("iterating items");
 		has_iterated = true;
 		current_iteration_id = iteration_id;
@@ -420,10 +440,11 @@ public class Belt_List {
 		if(items.size() == 0){
 			//System.out.println("just empty list");
 			moving_at_and_after_this_index = 0;
-			
+			iteration_mode = "no items";
 			return -1;
 		}
 		if(items.get(0).empty){
+			iteration_mode = "front empty";
 			//System.out.println("all push because empty at front");
 			items.remove(0);
 			moving_at_and_after_this_index = 0;
@@ -442,6 +463,7 @@ public class Belt_List {
 		int index_pushed_at = -1;
 		for(int i = 0; i < items.size(); i++){
 			if(items.get(i).empty){
+				iteration_mode = "semi-push";
 				//System.out.println("semi push at: " + i);
 				index_pushed_at = i;
 				items.remove(i);
@@ -450,6 +472,7 @@ public class Belt_List {
 			}
 		}
 		if(push_to_output(items.get(0))){
+			iteration_mode = "pushed output";
 			//System.out.println("was able to push to output");
 			moving_at_and_after_this_index = 0;
 			items.remove(0);
@@ -457,12 +480,27 @@ public class Belt_List {
 				items.add(index_pushed_at - 1, Item_In_List.new_empty());
 			return 1;
 		}
-		//Belt_List list_output = output_locationStruct.belt.get_list_from_side(output_locationStruct.side);
-		//int output_list_position = list_output.get_list_position_from_beltPositionSide(output_locationStruct);
+		tryingcycle:
+		if(output_locationStruct.belt != null){
+			Belt_List list_output = output_locationStruct.belt.get_list_from_side(output_locationStruct.side);
+			int output_list_position = list_output.get_list_position_from_beltPositionSide(output_locationStruct);
+			if(!list_output.is_last_item(output_list_position)){
+				break tryingcycle;
+			}
+			if(list_output.current_iteration_id != iteration_id){
+				break tryingcycle;
+			}
+			iteration_mode = "cycle";
+			list_output.add_item_by_position(output_list_position + 1, items.get(0));
+			items.remove(0);
+			moving_at_and_after_this_index = 0;
+			return 1;
+		}
 		
-		//if(list_output.is_last_item(output_list_position)){
-		//	return 1;
-		//}
+		//cannot push, push to output, send our iteration id
+		//they cannot push, push to output, send the same id
+		//they return
+		
 		
 		return 0;
 		
@@ -534,6 +572,7 @@ public class Belt_List {
 			//System.out.println("drawing non-moving: " + i + " "+array_to_cord(xy));
 			item.draw(grf, xy[0], xy[1]);
 		}
+		//System.out.println(self_index+", drawing moving items from " +moving_at_and_after_this_index+ " to, "+items.size());
 		if(moving_at_and_after_this_index < items.size())
 		for(int i = moving_at_and_after_this_index; i < items.size(); i++){
 			Item_In_List item = items.get(i);
@@ -558,7 +597,11 @@ public class Belt_List {
 		return "("+xy[0]+", "+xy[1]+")";
 	}
 	
+	
+	
 	//endregion
+	
+	
 	
 	public int size(){
 		return belts.size();

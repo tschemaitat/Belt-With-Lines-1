@@ -15,7 +15,7 @@ public class Screen extends JPanel {
     Command external_drawer;
     Graphics current_graphics = null;
     Mouse mouse;
-    Point mouse_point;
+    public Point mouse_point;
     public Screen(int width, int height){
         mouse_events = new ArrayList<>();
         frame = new JFrame();
@@ -51,7 +51,7 @@ public class Screen extends JPanel {
         Graphics2D graph = (Graphics2D) grf;
         graph.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         if(stack != null)
-            stack.draw(grf);
+            stack.draw((Graphics2D) grf);
         //grf.setColor(Color.white);
         //grf.fillRect(600, 100, 50, 50);
         if(external_drawer != null)
@@ -100,13 +100,63 @@ public class Screen extends JPanel {
             }
         }
     }
+    Twod mouse_touching_this = null;
+    public void observe_mouse_touch(){
+        //System.out.println("sending touch event");
+        
+        Point mouse_point = getMouse_point();
+        int x = mouse_point.x;
+        int y = mouse_point.y;
+        
+        MouseEvent_Edited touch_event = new MouseEvent_Edited(x, y, MouseEvent_Edited.type_touch);
+        MouseEvent_Edited untouch_event = new MouseEvent_Edited(x, y, MouseEvent_Edited.type_untouch);
+        boolean found = observe(touch_event);
+        if(found){
+            //System.out.println("found observer: " + touch_event.observer.name + "point: "+mouse_point + "event: " + touch_event.x() + ", " + touch_event.y());
+            if(mouse_touching_this != null){
+                if(mouse_touching_this != touch_event.observer){
+                    mouse_touching_this.mouse_touching = false;
+                    //System.out.println("sending untouch: " + untouch_event.type());
+                    mouse_touching_this.onMouseEvent(untouch_event);
+                    mouse_touching_this = null;
+                }
+            }
+            //System.out.println("observed touch");
+            if(touch_event.observer.mouse_touching == false){
+                mouse_touching_this = touch_event.observer;
+                touch_event.observer.mouse_touching = true;
+                touch_event.observer.onMouseEvent(touch_event);
+            }
+            
+            return;
+        }
+        else{
+            if(mouse_touching_this != null){
+                mouse_touching_this.mouse_touching = false;
+                mouse_touching_this.onMouseEvent(untouch_event);
+                mouse_touching_this = null;
+            }
+        }
+        //System.out.println("nothing observed touch");
+        
+    }
+    
+    private Point getMouse_point(){
+        Point windowPosition = this.getLocationOnScreen();
+        Point mousePosition = MouseInfo.getPointerInfo().getLocation();
+        int x = mousePosition.x - windowPosition.x;
+        int y = mousePosition.y - windowPosition.y;
+        mouse_point = new Point(x, y);
+        return new Point(x, y);
+        
+    }
     
     private boolean observe(MouseEvent_Edited event){
         return stack.observe(event);
     }
     
     public void update_screen(){
-        mouse_point = MouseInfo.getPointerInfo().getLocation();
+        //mouse_point = MouseInfo.getPointerInfo().getLocation();
         frame.repaint();
     }
 }

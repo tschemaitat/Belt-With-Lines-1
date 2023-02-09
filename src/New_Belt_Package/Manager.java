@@ -11,9 +11,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Manager {
+	
+	//belt chunks
+	//belt cycle
+	//balancer
+	//belt creater/deleter
+	
+	
 	static int[][] diff = new int[][]{{-1, 0},{0, 1},{1, 0},{0, -1}};
 	int belt_grid_top = 100;
-	int belt_grid_left = 100;
+	int belt_grid_left = 300;
 	int belt_grid_width = 64;
 	int[][] beltMap = {
 			{-1, -1,-1,-1,-1,-1,-1,-1,-1,-1},
@@ -35,6 +42,8 @@ public class Manager {
 	List<Belt_List> belt_lists;
 	List<Belt> belts = new ArrayList<>();
 	public static Belt[][] beltGrid;
+	public boolean touching_belt_layer = false;
+	Screen screen;
 	
 	int add_belt_orientation = 0;
 	public int graphical_iteration = 0;
@@ -44,7 +53,8 @@ public class Manager {
 		return main_dude;
 	}
 	
-	public Manager(Layout layout){
+	public Manager(Layout layout, Screen screen){
+		this.screen = screen;
 		main_dude = this;
 		this.layout = layout;
 		Images.loadSprites();
@@ -154,9 +164,10 @@ public class Manager {
 	private void create_UI(){
 		LayoutParameters params_bottom_layer = new RectP(0, 0, layout.getWidth(), layout.getHeight());
 		LayoutParameters params_turner = new RectP(10, 110, 80, 80);
+		LayoutParameters params_list_debug = new RectP(10, 300, 300, 400);
 		Twod bottom_layer = new Twod(params_bottom_layer, layout) {
 			@Override
-			public void draw(Graphics grf) {
+			public void draw(Graphics2D grf) {
 				//grf.setColor(Color.black);
 				//grf.drawRect(getX(), getY(), getWidth(), getHeight());
 				getManger().draw((Graphics2D) grf, graphical_iteration);
@@ -164,12 +175,21 @@ public class Manager {
 			
 			@Override
 			public void onMouseEvent(MouseEvent_Edited event) {
+				if(event.type == MouseEvent_Edited.type_untouch){
+					touching_belt_layer = false;
+				}
+				if(event.type == MouseEvent_Edited.type_touch){
+					touching_belt_layer = true;
+				}
+				
+				System.out.println(name+ " got mouse event " + event.type() + " (" + event.x() +", " + event.y()+")");
 				if(event.type == MouseEvent_Edited.type_click) {
 					System.out.println("adding or deleting a belt");
 					int x = event.x();
 					int y = event.y();
 					int[] cord = cord_pixel_to_belt(x, y);
-					belt_deleteOrAdd_procedure(cord[0] + 1, cord[1] + 1, add_belt_orientation);
+					System.out.println(new Point(cord[0], cord[1]));
+					belt_deleteOrAdd_procedure(cord[0], cord[1], add_belt_orientation);
 				}
 			}
 		};
@@ -178,7 +198,7 @@ public class Manager {
 		Twod belt_turner = new Twod(params_turner, layout) {
 			
 			@Override
-			public void draw(Graphics grf) {
+			public void draw(Graphics2D grf) {
 				grf.setColor(Color.black);
 				grf.drawRect(getX(), getY(), getWidth(), getHeight());
 				grf.drawString("turner", getX(), getY());
@@ -186,6 +206,10 @@ public class Manager {
 			
 			@Override
 			public void onMouseEvent(MouseEvent_Edited event) {
+				System.out.println(name+ " got mouse event " + event.type() + " (" + event.x() +", " + event.y()+")");
+				if(event.type == MouseEvent_Edited.type_touch)
+					System.out.println("touched");
+				
 				
 				if(event.type == MouseEvent_Edited.type_click) {
 					add_belt_orientation = (add_belt_orientation+1) % 4;
@@ -193,8 +217,55 @@ public class Manager {
 				}
 			}
 		};
-		layout.to_bottom(bottom_layer);
+		
 		belt_turner.name = "turner";
+		
+		Twod list_debug = new Twod(params_list_debug, layout) {
+			@Override
+			public void draw(Graphics2D grf) {
+				grf.setColor(Color.white);
+				grf.fillRect(getX(), getY(), getWidth(), getHeight());
+				grf.setColor(Color.black);
+				grf.drawRect(getX(), getY(), getWidth(), getHeight());
+				grf.setColor(Color.black);
+				
+				grf.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+						RenderingHints.VALUE_ANTIALIAS_ON);
+				grf.setRenderingHint(RenderingHints.KEY_RENDERING,
+						RenderingHints.VALUE_RENDER_QUALITY);
+				int line_total_height = 0;
+				for(int i = 0; i < belt_lists.size(); i++){
+					String[] debug_print = new String[2];
+					
+					
+					Belt_List list = belt_lists.get(i);
+					debug_print[0] = "";
+					debug_print[0] += list.self_index + ": (mode: "+list.iteration_mode+ "), "+ list.belt_index_and_side();
+					debug_print[1] = list.item_characters();
+					for(int j = 0; j < debug_print.length; j++){
+						BufferedImage image = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
+						Graphics2D image_grf = (Graphics2D) image.getGraphics();
+						image_grf.setColor(Color.black);
+						int height = drawString(image_grf, debug_print[j], getWidth(), 0);
+						grf.drawImage(image, getX(), getY() + line_total_height, null);
+						line_total_height += height + 4;
+					}
+					line_total_height += 6;
+				}
+				
+				
+				
+				
+				
+			}
+			
+			@Override
+			public void onMouseEvent(MouseEvent_Edited event) {
+				System.out.println(name+ " got mouse event " + event.type() + " (" + event.x() +", " + event.y()+")");
+			}
+		};
+		list_debug.name = "list_debug";
+		layout.to_bottom(bottom_layer);
 		
 		
 	}
@@ -202,10 +273,10 @@ public class Manager {
 	
 	//region items
 	private void add_item_to_list(Belt belt, int belt_position, int side){
-		System.out.println("adding one item: belt: " +belt.arrayIndex+", pos: "+belt_position+", side: "+side);
+		//System.out.println("adding one item: belt: " +belt.arrayIndex+", pos: "+belt_position+", side: "+side);
 		BufferedImage image = Images.iron;
 		Belt_List belt_list = belt.get_list_from_side(side);
-		System.out.println("belt: "+belt.arrayIndex+" is found in list: " + belt_list);
+		//System.out.println("belt: "+belt.arrayIndex+" is found in list: " + belt_list);
 		//System.out.println("got list: " + belt_list);
 		int list_position = belt_list.get_list_position_from_beltPositionSide(new LocationStruct(belt_position, side, belt));
 		if(list_position == -1){
@@ -393,10 +464,38 @@ public class Manager {
 	//endregion
 	
 	//region graphics
+	public void draw_belt_ghost(Graphics2D grf){
+		//System.out.println("drawing ghost");
+		if(screen.mouse_point == null)
+			return;
+		int grid_cord[] = cord_pixel_to_belt(screen.mouse_point.x, screen.mouse_point.y);
+		int grid_row = grid_cord[0];
+		int grid_column = grid_cord[1];
+		//System.out.println("grid: " + new Point(grid_cord[0], grid_cord[1]));
+		if(grid_cord[0] < 0 || grid_cord[1] < 0 || grid_cord[0] > beltGrid.length || grid_cord[1] < beltGrid[0].length){
+			return;
+		}
+		
+		if(beltGrid[grid_row][grid_column] != null)
+			return;
+		int rotation = add_belt_orientation;
+		BufferedImage belt = Images.beltUpImage;
+		for(int i = 0; i < rotation; i++)
+			belt = Images.rotateBy90(belt);
+		belt = Images.setAlpha(belt, 128);
+		int belt_x = belt_grid_left + (grid_column - 1) *belt_grid_width;
+		int belt_y = belt_grid_top + (grid_row - 1)*belt_grid_width;
+		System.out.println("ghost at: " + new Point(belt_x, belt_y));
+		grf.drawImage(belt, belt_x,belt_y,null);
+		
+	}
 	public void draw(Graphics2D grf, int graphical_iteration){
+		
 		draw_belts(grf);
 		draw_belt_lines(grf);
 		draw_items_in_list(grf, graphical_iteration);
+		if(touching_belt_layer)
+			draw_belt_ghost(grf);
 	}
 	private void draw_items_in_list(Graphics2D grf, int graphical_iteration){
 		for(int i = 0; i < belt_lists.size(); i++){
@@ -478,8 +577,8 @@ public class Manager {
 		//System.out.println("pixel cords x: " +x+" y: "+y);
 		int[] belt_cord = cord_pixel_to_belt(x, y);
 		//System.out.println("pixel cords x: " +belt_cord[0]+" y: "+belt_cord[1]);
-		int grid_x = belt_cord[1]+1;
-		int grid_y = belt_cord[0]+1;
+		int grid_x = belt_cord[1];
+		int grid_y = belt_cord[0];
 		
 		belt_deleteOrAdd_procedure(grid_x, grid_y, add_belt_orientation);
 		
@@ -491,11 +590,35 @@ public class Manager {
 	public int[] cord_pixel_to_belt(int x, int y){
 		return new int[]{
 				
-				(y-belt_grid_top)/belt_grid_width,
-				(x-belt_grid_left)/belt_grid_width
+				((y-belt_grid_top)/belt_grid_width) + 1,
+				((x-belt_grid_left)/belt_grid_width) + 1
 		};
 	}
 	//endregion
+	
+	public static int drawString(Graphics2D g, String text, int width, int height) {
+		FontMetrics fm = g.getFontMetrics();
+		int lineHeight = fm.getHeight();
+		
+		int x = 0;
+		int y = fm.getAscent();
+		
+		String[] words = text.split(" ");
+		
+		for (String word : words) {
+			int wordWidth = fm.stringWidth(word + " ");
+			
+			if (x + wordWidth >= width) {
+				x = 0;
+				y += lineHeight;
+			}
+			
+			g.drawString(word, x, y);
+			//System.out.println("drawing word: " + word + " at " + x + ", " + y);
+			x += wordWidth;
+		}
+		return y;
+	}
 	
 	public void print_state(){
 		System.out.println("printing state");

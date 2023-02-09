@@ -52,6 +52,8 @@ public abstract class Twod {
 	int height;
 	int width;
 	
+	boolean mouse_touching = false;
+	
 	
 	
 	LayoutParameters layoutParameters;
@@ -105,6 +107,7 @@ public abstract class Twod {
 	}
 	
 	public boolean observe(MouseEvent_Edited event){
+		
 		//System.out.println("observing for twod: " + name);
 		//System.out.println("event is: "+event.x()+","+event.y()+" twod is at: " + getX() + ", " + getY() + " width/height: " + width+", " + height);
 		if(UIvisibility == 0)
@@ -120,7 +123,7 @@ public abstract class Twod {
 		return false;
 	}
 	
-	public abstract void draw(Graphics grf);
+	public abstract void draw(Graphics2D grf);
 	
 	public void update(){
 		x = layoutParameters.getX();

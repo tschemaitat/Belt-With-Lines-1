@@ -34,7 +34,7 @@ public class Image_Twod extends Twod {
     
     
     
-    public void draw(Graphics grf){
+    public void draw(Graphics2D grf){
         //grf.drawRect(x, y, width, height);
         if(visibility == VISIBLE & drawable != null)
             drawable.draw(grf, this);
