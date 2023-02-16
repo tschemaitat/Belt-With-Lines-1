@@ -5,18 +5,19 @@ import static New_Belt_Package.First.Enum.*;
 import static New_Belt_Package.First.Images.*;
 
 public class StraightBelt extends Belt {
+    
     boolean backBelt;
     boolean rightBelt;
     boolean leftBelt;
 
-    public StraightBelt(int orientation, int[] oAround, int x, int y, int grid_x, int grid_y) {
-        super(orientation, oAround, x, y, grid_x, grid_y);
-        setAroundBooleans(oAround);
+    public StraightBelt(Belt[][] beltGrid, int orientation, int grid_x, int grid_y) {
+        super(beltGrid, orientation, grid_x, grid_y);
+        setAroundBooleans(getoAround());
         shape = straight;
         shift_item_locations();
     }
     
-    private void setAroundBooleans(int[] oAround){
+    protected void setAroundBooleans(int[] oAround){
         backBelt = false;
         rightBelt = false;
         leftBelt = false;
@@ -101,7 +102,6 @@ public class StraightBelt extends Belt {
         newSide.value = side;
         return true;
     }
-
     public Belt getInputBeltAndSide(int side, IntWrap newSide){
         setAroundBooleans(getoAround());
         //if we have a back belt, the priority input is the like sides of that back belt

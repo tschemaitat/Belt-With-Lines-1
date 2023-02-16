@@ -19,9 +19,9 @@ public class Manager {
 	
 	
 	static int[][] diff = new int[][]{{-1, 0},{0, 1},{1, 0},{0, -1}};
-	int belt_grid_top = 100;
-	int belt_grid_left = 300;
-	int belt_grid_width = 64;
+	static int belt_grid_top = 100;
+	static int belt_grid_left = 300;
+	static int belt_grid_width = 64;
 	int[][] beltMap = {
 			{-1, -1,-1,-1,-1,-1,-1,-1,-1,-1},
 			{-1, 0, 3, 1, 1, 2,-1,-1,-1,-1},
@@ -46,10 +46,14 @@ public class Manager {
 	Screen screen;
 	
 	int add_belt_orientation = 0;
+	int add_belt_type = 0;
+	int add_belt_type_regular = 900;
+	int add_belt_type_balancer = 901;
+	
 	public int graphical_iteration = 0;
 	public static Manager main_dude;
 	
-	public static Manager getManger(){
+	public static Manager getManager(){
 		return main_dude;
 	}
 	
@@ -120,7 +124,7 @@ public class Manager {
 		int width = 9;
 		int height = 7;
 		
-		beltGrid = new Belt[height][width];
+		beltGrid = new Belt[height + 5][width];
 		int index = 0;
 		for(int i = 1; i < height - 1; i++){
 			for(int j = 1; j < width - 1; j++){
@@ -164,13 +168,13 @@ public class Manager {
 	private void create_UI(){
 		LayoutParameters params_bottom_layer = new RectP(0, 0, layout.getWidth(), layout.getHeight());
 		LayoutParameters params_turner = new RectP(10, 110, 80, 80);
-		LayoutParameters params_list_debug = new RectP(10, 300, 300, 400);
+		
 		Twod bottom_layer = new Twod(params_bottom_layer, layout) {
 			@Override
 			public void draw(Graphics2D grf) {
 				//grf.setColor(Color.black);
 				//grf.drawRect(getX(), getY(), getWidth(), getHeight());
-				getManger().draw((Graphics2D) grf, graphical_iteration);
+				getManager().draw((Graphics2D) grf, graphical_iteration);
 			}
 			
 			@Override
@@ -220,6 +224,7 @@ public class Manager {
 		
 		belt_turner.name = "turner";
 		
+		LayoutParameters params_list_debug = new RectP(10, 300, 300, 400);
 		Twod list_debug = new Twod(params_list_debug, layout) {
 			@Override
 			public void draw(Graphics2D grf) {
@@ -242,13 +247,14 @@ public class Manager {
 					debug_print[0] = "";
 					debug_print[0] += list.self_index + ": (mode: "+list.iteration_mode+ "), "+ list.belt_index_and_side();
 					debug_print[1] = list.item_characters();
+					int font_size = 15;
 					for(int j = 0; j < debug_print.length; j++){
-						BufferedImage image = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
-						Graphics2D image_grf = (Graphics2D) image.getGraphics();
-						image_grf.setColor(Color.black);
-						int height = drawString(image_grf, debug_print[j], getWidth(), 0);
-						grf.drawImage(image, getX(), getY() + line_total_height, null);
-						line_total_height += height + 4;
+						//BufferedImage image = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
+						//Graphics2D image_grf = (Graphics2D) image.getGraphics();
+						//image_grf.setColor(Color.black);
+						int printed_height = drawString(grf, debug_print[j], getX()+5, getY() + line_total_height, getWidth(), getHeight(), Color.black, font_size);
+						//grf.drawImage(image, getX(), getY() + line_total_height, null);
+						line_total_height += printed_height + 4;
 					}
 					line_total_height += 6;
 				}
@@ -266,6 +272,61 @@ public class Manager {
 		};
 		list_debug.name = "list_debug";
 		layout.to_bottom(bottom_layer);
+		
+		int selector_top = 10;
+		int selector_left = 10;
+		
+		
+		RectP select_balancer_params = new RectP(selector_left, selector_top, 60, 20);
+		Twod select_balancer = new Twod(select_balancer_params, layout) {
+			@Override
+			public void draw(Graphics2D grf) {
+				
+				
+				
+				if(add_belt_type == add_belt_type_balancer)
+					drawDropShadow(grf, getX(), getY(), getWidth(), getHeight(), 2, 70);
+				grf.setColor(Color.white);
+				grf.fillRect(getX(), getY(), getWidth(), getHeight());
+				grf.setColor(Color.black);
+				grf.drawRect(getX(), getY(), getWidth(), getHeight());
+				drawString(grf, "balancer", getX(), getY(), getWidth(), getHeight(), Color.black, 15);
+			}
+			
+			@Override
+			public void onMouseEvent(MouseEvent_Edited event) {
+				if(event.type == MouseEvent_Edited.type_click){
+					add_belt_type = add_belt_type_balancer;
+				}
+			}
+		};
+		
+		RectP select_belt_params = new RectP(selector_left, selector_top + 30, 60, 20);
+		Twod select_belt = new Twod(select_belt_params, layout) {
+			@Override
+			public void draw(Graphics2D grf) {
+				grf.setColor(Color.black);
+				if(add_belt_type == add_belt_type_regular)
+					drawDropShadow(grf, getX(), getY(), getWidth(), getHeight(), 2, 70);
+				
+				grf.setColor(Color.white);
+				grf.fillRect(getX(), getY(), getWidth(), getHeight());
+				grf.setColor(Color.black);
+				grf.drawRect(getX(), getY(), getWidth(), getHeight());
+				
+				//BufferedImage image = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
+				//Graphics2D image_grf = (Graphics2D) image.getGraphics();
+				//image_grf.setColor(Color.black);
+				drawString(grf, "belt", getX()+2, getY(), getWidth(), getHeight(), Color.black, 15);
+			}
+			
+			@Override
+			public void onMouseEvent(MouseEvent_Edited event) {
+				if(event.type == MouseEvent_Edited.type_click){
+					add_belt_type = add_belt_type_regular;
+				}
+			}
+		};
 		
 		
 	}
@@ -291,10 +352,10 @@ public class Manager {
 	
 	//region add/deleting belts and lists
 	private Belt make_belt_from_grid(int i, int j){
-		return Belt.makeBelt(beltMap[i][j], new int[]{
+		return Belt.makeBelt(beltGrid, beltMap[i][j], new int[]{
 						beltMap[i - 1][j], beltMap[i][j + 1],
 						beltMap[i + 1][j], beltMap[i][j - 1]},
-				belt_grid_left + belt_grid_width * (j-1) , belt_grid_top+belt_grid_width * (i-1), i, j);
+				i, j);
 	}
 	private Belt make_belt_from_map(int row, int column, int orientation){
 		int[] oAround = new int[4];
@@ -307,9 +368,8 @@ public class Manager {
 		}
 		
 		
-		return Belt.makeBelt(orientation, oAround,
-				belt_grid_left + belt_grid_width * (column-1) ,
-				belt_grid_top+belt_grid_width * (row-1), row, column);
+		return Belt.makeBelt(beltGrid, orientation, oAround,
+				row, column);
 	}
 	private void remove_belt_from_manager(Belt belt, Belt new_belt){
 		//if deleting a belt
@@ -359,7 +419,7 @@ public class Manager {
 		}
 	}
 	private Belt remake_belt(Belt belt_around){
-		return Belt.makeBelt(belt_around.orientation, belt_around.getoAround(), belt_around.x, belt_around.y, belt_around.grid_row, belt_around.grid_column);
+		return Belt.makeBelt(beltGrid, belt_around.orientation, belt_around.getoAround(), belt_around.grid_row, belt_around.grid_column);
 	}
 	private void belt_deleteOrAdd_procedure(int grid_row, int grid_column, int direction_new_belt){
 		//delete belt
@@ -463,31 +523,74 @@ public class Manager {
 	}
 	//endregion
 	
+	//region balancers
+	private void add_balancer(int grid_row, int grid_column, int orientation){
+	
+	}
+	//endregion
+	
 	//region graphics
 	public void draw_belt_ghost(Graphics2D grf){
-		//System.out.println("drawing ghost");
+		int[] space_taken;
+		if(add_belt_type == add_belt_type_balancer){
+			space_taken = Balancer.get_extra_space_taken(add_belt_orientation);
+		}
+		else
+			space_taken = new int[]{0,0};
+		System.out.println("space taken: " + new Point(space_taken[0], space_taken[1]));
+		System.out.println("drawing ghost");
 		if(screen.mouse_point == null)
 			return;
 		int grid_cord[] = cord_pixel_to_belt(screen.mouse_point.x, screen.mouse_point.y);
 		int grid_row = grid_cord[0];
 		int grid_column = grid_cord[1];
-		//System.out.println("grid: " + new Point(grid_cord[0], grid_cord[1]));
-		if(grid_cord[0] < 0 || grid_cord[1] < 0 || grid_cord[0] > beltGrid.length || grid_cord[1] < beltGrid[0].length){
+		System.out.println("grid: " + new Point(grid_cord[0], grid_cord[1]));
+		if(building_doesnt_fit(space_taken, grid_cord[0], grid_cord[1], beltGrid)){
 			return;
 		}
 		
-		if(beltGrid[grid_row][grid_column] != null)
-			return;
-		int rotation = add_belt_orientation;
-		BufferedImage belt = Images.beltUpImage;
-		for(int i = 0; i < rotation; i++)
-			belt = Images.rotateBy90(belt);
-		belt = Images.setAlpha(belt, 128);
-		int belt_x = belt_grid_left + (grid_column - 1) *belt_grid_width;
-		int belt_y = belt_grid_top + (grid_row - 1)*belt_grid_width;
-		System.out.println("ghost at: " + new Point(belt_x, belt_y));
-		grf.drawImage(belt, belt_x,belt_y,null);
 		
+		
+		
+		
+		
+		BufferedImage ghost = new BufferedImage(64 * (space_taken[1] + 1), 64 * (space_taken[0] + 1), BufferedImage.TYPE_INT_ARGB);
+		//BufferedImage ghost = new BufferedImage(128, 64 * (space_taken[0] + 1), BufferedImage.TYPE_INT_ARGB);
+		
+		Graphics2D ghost_grf = (Graphics2D) ghost.getGraphics();
+		int rotation = add_belt_orientation;
+		
+		if(add_belt_type == add_belt_type_regular){
+			if(beltGrid[grid_row][grid_column] != null)
+				return;
+			Belt belt = Belt.makeBelt(beltGrid, rotation, new int[]{-1,-1,-1,-1}, grid_row, grid_column);
+			ghost_grf.drawImage(belt.image, 0, 0, null);
+			ghost = Images.setAlpha(ghost, 128);
+			grf.drawImage(ghost, belt.x, belt.y, null);
+			
+			return;
+		}
+		if(beltGrid[grid_row][grid_column] != null || beltGrid[grid_row + space_taken[0]][grid_column + space_taken[1]] != null)
+			return;
+		System.out.println("drawing balancer ghost");
+		Balancer balancer = new Balancer(beltGrid, grid_row, grid_column, rotation);
+		ghost_grf.drawImage(balancer.image, 0, 0, null);
+		
+		grf.drawImage(ghost, balancer.x,balancer.y,null);
+		
+//		BufferedImage belt = Images.beltUpImage;
+//		for(int i = 0; i < rotation; i++)
+//			belt = Images.rotateBy90(belt);
+//		belt = Images.setAlpha(belt, 128);
+//		int belt_x = belt_grid_left + (grid_column - 1) *belt_grid_width;
+//		int belt_y = belt_grid_top + (grid_row - 1)*belt_grid_width;
+//		System.out.println("ghost at: " + new Point(belt_x, belt_y));
+//		grf.drawImage(belt, belt_x,belt_y,null);
+		
+	}
+	
+	public static boolean building_doesnt_fit(int[] space_taken, int row, int column, Belt[][] beltGrid){
+		return (row < 0 || column < 0 || row >= beltGrid.length - space_taken[0] || column >= beltGrid[0].length - space_taken[1]);
 	}
 	public void draw(Graphics2D grf, int graphical_iteration){
 		
@@ -555,20 +658,36 @@ public class Manager {
 		grf.drawRect(belt.x - 100, belt.y, 64, 64);
 	}
 	private void draw_belts(Graphics2D grf){
+		Balancer balancer = new Balancer(beltGrid, 8, 5, 1);
+		grf.drawImage(balancer.image, balancer.x, balancer.y, null);
 		
 		for(int i = 0; i < belts.size(); i++){
-			grf.drawImage(belts.get(i).image, belts.get(i).x - cameraX,belts.get(i).y - cameraY,null);
-			
-			grf.setColor(Color.white);
-			grf.fillRect(belts.get(i).x - cameraX + 28, belts.get(i).y - cameraY + 20, 24, 24);
-			grf.setColor(Color.black);
-			grf.setFont(new Font("TimesRoman", Font.PLAIN, 20));
-			
-			grf.drawString(String.valueOf(belts.get(i).arrayIndex), belts.get(i).x - cameraX + 32,  belts.get(i).y - cameraY + 32);
-			if(belts.get(i).image == null)
-				System.out.println("image is null");
+			if(belts.get(i) instanceof Belt_In_Balancer){
+				continue;
+			}
+			draw_belt(grf, belts.get(i), false);
 		}
 	}
+	
+	private void draw_belt(Graphics2D grf, Belt belt, boolean at_zero){
+		int left = belt.x;
+		int top = belt.y;
+		if(at_zero){
+			left = 0;
+			top = 0;
+		}
+		grf.drawImage(belt.image, left - cameraX,top - cameraY,null);
+		
+		grf.setColor(Color.white);
+		grf.fillRect(left - cameraX + 28, top - cameraY + 20, 24, 24);
+		grf.setColor(Color.black);
+		grf.setFont(new Font("TimesRoman", Font.PLAIN, 20));
+		grf.drawString(String.valueOf(belt.arrayIndex), left - cameraX + 32,  top - cameraY + 32);
+		if(belt.image == null)
+			System.out.println("image is null");
+	}
+	
+	
 	//endregion
 	
 	//region UI
@@ -587,18 +706,40 @@ public class Manager {
 		//print_state();
 		
 	}
-	public int[] cord_pixel_to_belt(int x, int y){
+	public static int[] cord_pixel_to_belt(int x, int y){
 		return new int[]{
 				
 				((y-belt_grid_top)/belt_grid_width) + 1,
 				((x-belt_grid_left)/belt_grid_width) + 1
 		};
 	}
+	public static int[] grid_to_pixel(int row, int column){
+		return new int[]{
+				(belt_grid_top + belt_grid_width * (row - 1)),
+				(belt_grid_left + belt_grid_width * (column - 1))};
+	}
 	//endregion
 	
-	public static int drawString(Graphics2D g, String text, int width, int height) {
+	public static int drawString(Graphics2D grf, String string, int left, int top, int width, int height, Color color, int size){
+		BufferedImage image = new BufferedImage(width, 200, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D image_grf = (Graphics2D) image.getGraphics();
+		image_grf.setColor(color);
+		int total_height = drawStringAtTopLeft(image_grf, string, width-10, 0, size);
+		grf.drawImage(image, left, top, null);
+		return total_height;
+		
+	}
+	public static int drawStringAtTopLeft(Graphics2D g, String text, int width, int height, int letter_height) {
 		FontMetrics fm = g.getFontMetrics();
-		int lineHeight = fm.getHeight();
+		float lineHeight = fm.getHeight();
+		float ratio = (float)(letter_height)/lineHeight;
+		Font font = g.getFont();
+		Font new_font = font.deriveFont(font.getStyle(), font.getSize()*ratio);
+		g.setFont(new_font);
+		fm = g.getFontMetrics();
+		lineHeight = fm.getHeight();
+		
+		
 		
 		int x = 0;
 		int y = fm.getAscent();
@@ -608,7 +749,7 @@ public class Manager {
 		for (String word : words) {
 			int wordWidth = fm.stringWidth(word + " ");
 			
-			if (x + wordWidth >= width) {
+			if (x + wordWidth >= width && x != 0) {
 				x = 0;
 				y += lineHeight;
 			}
@@ -618,6 +759,43 @@ public class Manager {
 			x += wordWidth;
 		}
 		return y;
+	}
+	
+	
+	public static BufferedImage createDropShadow(int image_width, int image_height, int shadowSize, int shadowOpacity) {
+		int width = image_width + shadowSize * 2;
+		int height = image_height + shadowSize * 2;
+		
+		BufferedImage shadow = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D g2d = shadow.createGraphics();
+		
+		//g2d.drawImage(image, shadowSize, shadowSize, null);
+		
+		g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_IN, (float) shadowOpacity / 255.0f));
+		g2d.setColor(Color.BLACK);
+		g2d.fillRect(0, 0, width, height);
+		
+		g2d.dispose();
+		
+		return shadow;
+	}
+	
+	public static void drawDropShadow(Graphics2D grf, int left, int top, int image_width, int image_height, int shadowSize, int shadowOpacity){
+		int width = image_width + shadowSize * 2;
+		int height = image_height + shadowSize * 2;
+		
+		BufferedImage shadow = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		Graphics2D image_grf = (Graphics2D) shadow.getGraphics();
+		Composite composite = grf.getComposite();
+		image_grf.setColor(Color.black);
+		image_grf.fillRect(0, 0, width, height);
+		image_grf.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_IN, (float) shadowOpacity / 255.0f));
+		image_grf.setColor(Color.BLACK);
+		image_grf.fillRect(0, 0, width, height);
+		grf.drawImage(shadow, left-shadowSize, top - shadowSize, null);
+		grf.setComposite(composite);
+		grf.setColor(Color.black);
+		
 	}
 	
 	public void print_state(){

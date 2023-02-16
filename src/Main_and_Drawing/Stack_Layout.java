@@ -16,7 +16,7 @@ public class Stack_Layout extends Layout {
         for(int i = 0; i < list.size(); i++){
             Twod obj = list.get(i);
             obj.draw(grf);
-            obj.drawBounds(grf);
+            //obj.drawBounds(grf);
         }
     }
     

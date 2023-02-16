@@ -93,7 +93,7 @@ public class Screen extends JPanel {
             return;
         //System.out.println("popping event to observe");
         if(mouse_events.size() != 0){
-            MouseEvent_Edited event = mouse_events.remove(mouse_events.size() - 1);
+            MouseEvent_Edited event = mouse_events.remove(0);
             boolean found = observe(event);
             if(found){
                 event.observer.onMouseEvent(event);

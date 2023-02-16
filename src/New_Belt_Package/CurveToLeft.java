@@ -1,15 +1,12 @@
 package New_Belt_Package;
 
-import New_Belt_Package.Belt;
-import New_Belt_Package.IntWrap;
-
 import static New_Belt_Package.First.Enum.*;
 import static New_Belt_Package.First.Images.*;
 
 public class CurveToLeft extends Belt {
 
-    public CurveToLeft(int orientation, int[] oAround, int x, int y, int grid_x, int grid_y) {
-        super(orientation, oAround, x, y, grid_x, grid_y);
+    public CurveToLeft(Belt[][] beltGrid, int orientation, int grid_x, int grid_y) {
+        super(beltGrid, orientation, grid_x, grid_y);
         shape = curveToLeft;
         shift_item_locations();
     }

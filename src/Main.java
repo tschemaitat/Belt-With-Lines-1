@@ -48,6 +48,11 @@ public class Main {
 			g_buffer.setColor(Color.gray);
 			g_buffer.fillRect(0, 0, 800, 800);
 			//manager.draw_Items_In_Belts_Old(g_buffer);
+//			for(int i = 0; i < 30; i++){
+//				int x = 400 + ((i%5)*40)%200;
+//				int y = 200 + (i%6)*40%200;
+//				screen.add_mouse_event(new MouseEvent_Edited(x, y, MouseEvent_Edited.type_click));
+//			}
 			screen.pop_mouse_event_to_observe();
 			screen.observe_mouse_touch();
 			

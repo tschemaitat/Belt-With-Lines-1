@@ -20,9 +20,7 @@ public class Belt_List {
 	public boolean has_iterated = false;
 	public int current_iteration_id = -1;
 	public String iteration_mode = "";
-	
 	private List<Belt> log_order_of_belts_added = new ArrayList<>();
-	
 	List<Belt_List> input_lists = new ArrayList<>();
 	/*
 	additem() O(n)
@@ -43,10 +41,11 @@ public class Belt_List {
 	
 	
 	*/
+	
+	boolean has_two_outputs = false;
 	private LocationStruct output_locationStruct;
-	
+	private LocationStruct output_locationStruct_two;
 	private List<Belt_List> belt_lists;
-	
 	private int moving_at_and_after_this_index = -1;
 	
 	public Belt_List(int self_index, List<Belt_List> belt_lists){
@@ -75,11 +74,14 @@ public class Belt_List {
 		log_order_of_belts_added.add(belt);
 	}
 	
-	public void set_output(Belt b, int s, int p){
-		output_locationStruct = new LocationStruct(p, s, b);
-		
-		
-		
+	public void set_output(LocationStruct output){
+		output_locationStruct = output;
+	}
+	
+	public void set_two_outputs(LocationStruct output1, LocationStruct output2){
+		has_two_outputs = true;
+		output_locationStruct = output1;
+		output_locationStruct_two = output2;
 	}
 	
 	public void compile(){
@@ -114,6 +116,13 @@ public class Belt_List {
 			}
 			//we get iterations_per_position - 1 cordinates from the backwards position
 			//we get a final coordinate from our current position
+			if(index_belt == 0 && belt instanceof Belt_In_Balancer){
+				((Belt_In_Balancer) belt).getting_item_front = false;
+			}
+			if(index_belt == belts.size() - 1 && belt instanceof Belt_In_Balancer){
+				((Belt_In_Balancer) belt).getting_item_front = true;
+			}
+			
 			
 			
 			for(int index_position_in_belt = belt.max_items(side) - 1; index_position_in_belt >= 0; index_position_in_belt--){
@@ -221,7 +230,7 @@ public class Belt_List {
 			belts.get(i).remove_list(sides.get(i));
 		}
 		for(int i = 0; i < input_lists.size(); i++){
-			input_lists.get(i).set_output(null, -1, -1);
+			input_lists.get(i).set_output(new LocationStruct(-1, -1, null));
 		}
 		return temp_item_list;
 	}

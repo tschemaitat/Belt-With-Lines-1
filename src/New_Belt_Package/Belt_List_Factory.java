@@ -30,34 +30,46 @@ public class Belt_List_Factory {
 			
 			//System.out.println("adding forward, belt: " + forward);
 			if(forward == null){
-				belt_list.set_output(null, -1, -1);
+				belt_list.set_output(new LocationStruct(-1, -1, null));
 				//System.out.println("forward null");
 				break;
 			}
+			
 			//System.out.println("next belt: " + forward.arrayIndex);
 			IntWrap new_side = new IntWrap();
 			IntWrap new_position = new IntWrap();
 			BooleanWrap can_output = new BooleanWrap(false);
 			boolean is_priority = forward.getInputPriorityAndSide(current_belt, current_side, new_side, new_position, can_output);
 			
+			if(forward instanceof Belt_In_Balancer){
+				belt_list.add_belt_front(forward, new_side.value);
+				//set 2 outputs, one in the second half of the belt, one in the second half of the sibling belt
+				LocationStruct output1 = new LocationStruct(2, new_side.value, forward);
+				//LocationStruct output2 = new LocationStruct(2, current_side, ((Belt_In_Balancer) forward).sibling_belt);
+				//belt_list.set_two_outputs(output1, output2);
+				belt_list.set_output(output1);
+				break;
+			}
+			
 			//belts are facing eachother I think
 			if(can_output.value() == false){
 				//System.out.println("cannot output");
-				belt_list.set_output(null, -1, -1);
+				belt_list.set_output(new LocationStruct(-1, -1, null));
 				break;
 			}
 			
 			//if we aren't the priority, end the list
 			if(is_priority == false){
 				//System.out.println("not priority");
-				belt_list.set_output(forward, new_side.value, new_position.value);
+				
+				belt_list.set_output(new LocationStruct(new_position.value, new_side.value, forward));
 				//System.out.println("setting output: " + forward + " side: " + new_side.value + " pos: " + new_position.value);
 				break;
 			}
 			//if the belt belongs in a list (circle i think) just set it as the output
 			if(forward.get_list(new_side.value) != null){
 				//System.out.println("already in list");
-				belt_list.set_output(forward, new_side.value, new_position.value);
+				belt_list.set_output(new LocationStruct(new_position.value, new_side.value, forward));
 				break;
 			}
 			belt_list.add_belt_front(forward, new_side.value);
@@ -78,6 +90,11 @@ public class Belt_List_Factory {
 				//System.out.println("no back belt");
 				break;
 			}
+			if(backwards_belt instanceof Belt_In_Balancer){
+				belt_list.add_belt_behind(backwards_belt, new_side.value);
+				break;
+			}
+			
 			//System.out.println("back belt: " + backwards_belt.arrayIndex);
 			
 			if(backwards_belt.get_list(new_side.value) != null){
