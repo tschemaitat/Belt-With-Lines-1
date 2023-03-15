@@ -117,14 +117,13 @@ public class Manager {
 		
 	}
 	private void createBelts(){
-		int width = 9;
-		int height = 7;
+		int width = 20;
+		int height = 20;
 		
 		beltGrid = new Belt[height][width];
 		int index = 0;
-		for(int i = 1; i < height - 1; i++){
-			for(int j = 1; j < width - 1; j++){
-				
+		for(int i = 1; i < beltMap.length - 1; i++){
+			for(int j = 1; j < beltMap[0].length - 1; j++){
 				if(beltMap[i][j] != -1){
 					beltGrid[i][j] = make_belt_from_grid(i, j);
 					//System.out.println(i+", "+j+" x: "+beltGrid[i][j].x+" y: "+beltGrid[i][j].y);
@@ -239,8 +238,12 @@ public class Manager {
 					
 					
 					Belt_List list = belt_lists.get(i);
+					int output_belt_id = -1;
+					if(list.output_locationStruct.belt != null)
+						output_belt_id = list.output_locationStruct.belt.arrayIndex;
 					debug_print[0] = "";
-					debug_print[0] += list.self_index + ": (mode: "+list.iteration_mode+ "), "+ list.belt_index_and_side();
+					debug_print[0] += list.self_index + ": (mode: "+list.iteration_mode+ "), "+ list.belt_index_and_side()
+							+ "output: " + output_belt_id;
 					debug_print[1] = list.item_characters();
 					for(int j = 0; j < debug_print.length; j++){
 						BufferedImage image = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
@@ -291,6 +294,7 @@ public class Manager {
 	
 	//region add/deleting belts and lists
 	private Belt make_belt_from_grid(int i, int j){
+		
 		return Belt.makeBelt(beltMap[i][j], new int[]{
 						beltMap[i - 1][j], beltMap[i][j + 1],
 						beltMap[i + 1][j], beltMap[i][j - 1]},
@@ -472,7 +476,7 @@ public class Manager {
 		int grid_row = grid_cord[0];
 		int grid_column = grid_cord[1];
 		//System.out.println("grid: " + new Point(grid_cord[0], grid_cord[1]));
-		if(grid_cord[0] < 0 || grid_cord[1] < 0 || grid_cord[0] > beltGrid.length || grid_cord[1] < beltGrid[0].length){
+		if(grid_cord[0] < 0 || grid_cord[1] < 0 || grid_cord[0] > beltGrid.length || grid_cord[1] > beltGrid[0].length){
 			return;
 		}
 		

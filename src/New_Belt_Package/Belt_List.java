@@ -43,7 +43,7 @@ public class Belt_List {
 	
 	
 	*/
-	private LocationStruct output_locationStruct;
+	public LocationStruct output_locationStruct;
 	
 	private List<Belt_List> belt_lists;
 	
