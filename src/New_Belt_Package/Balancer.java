@@ -4,9 +4,10 @@ import New_Belt_Package.First.Images;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import static New_Belt_Package.First.Enum.*;
 
 public class Balancer {
-	Belt[][] belt_grid;
+	BeltGrid belt_grid;
 	int grid_row;
 	int grid_column;
 	int orientation;
@@ -16,7 +17,7 @@ public class Balancer {
 	int x;
 	int y;
 	
-	public Balancer(Belt[][] belt_grid, int grid_row, int grid_column, int orientation){
+	public Balancer(BeltGrid belt_grid, int grid_row, int grid_column, int orientation){
 		this.belt_grid = belt_grid;
 		this.grid_row = grid_row;
 		this.grid_column = grid_column;
@@ -52,12 +53,31 @@ public class Balancer {
 		for(int i = 0; i < orientation; i++){
 			image = Images.rotateBy90(image);
 		}
+		//System.out.println(image.getWidth() +" "+image.getHeight());
 	}
 	
+	public int[][] get_affected_around() {
+		int[][] diff_even = new int[][]{
+				{ 1, 0},
+				{ 1, 1},
+				{-1, 0},
+				{-1, 1},
+		};
+		int[][] diff_odd = new int[][]{
+				{ 0, 1},
+				{-1, 1},
+				{ 0,-1},
+				{-1,-1},
+		};
+		if(orientation % 2 == 0)
+			return diff_even;
+		return diff_odd;
+	}
 	
-	
-	private void draw_balancer(Graphics2D grf, Balancer balancer, boolean at_zero){
-	
+	public int[] get_extra_space_taken(){
+		if(orientation % 2 == 0)
+			return new int[]{0, 1};
+		return new int[]{1, 0};
 	}
 	
 	public static int[] get_extra_space_taken(int orientation){

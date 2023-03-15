@@ -8,7 +8,7 @@ public class Belt_In_Balancer extends StraightBelt {
 	public boolean left_belt_of_balancer;
 	boolean[][] in_list = new boolean[][]{{false, false},{false, false}};
 	
-	public Belt_In_Balancer(Belt[][] beltGrid, int orientation, int grid_x, int grid_y, boolean is_left) {
+	public Belt_In_Balancer(BeltGrid beltGrid, int orientation, int grid_x, int grid_y, boolean is_left) {
 		super(beltGrid, orientation, grid_x, grid_y);
 		left_belt_of_balancer = is_left;
 	}

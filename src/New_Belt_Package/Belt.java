@@ -8,7 +8,7 @@ import java.util.List;
 
 import static New_Belt_Package.First.Enum.*;
 
-abstract public class Belt extends Placable {
+abstract public class Belt implements Placeable{
     public static final int length = 64;
     public static final int horizontalItemPosition = 19;
     public static final int itemSize = 32;
@@ -36,9 +36,9 @@ abstract public class Belt extends Placable {
     
     static boolean setup = false;
     static int belt_count = 0;
-    Belt[][] beltGrid;
+    BeltGrid beltGrid;
     
-    public Belt(Belt[][] beltGrid, int orientation, int grid_row, int grid_column) {
+    public Belt(BeltGrid beltGrid, int orientation, int grid_row, int grid_column) {
         this.beltGrid = beltGrid;
         //System.out.println("("+grid_row+","+grid_column+") making belt: " + belt_count + " @@@@@@@@@@@@@@@@@@@");
         shape = -1;
@@ -62,7 +62,17 @@ abstract public class Belt extends Placable {
         //System.out.println(belt_count);
     }
     
+    
+    public int[][] get_affected_around() {
+        return Manager.diff;
+    }
+    
+    public int[] get_extra_space_taken(){
+        return new int[]{0, 0};
+    }
+    
     public int[] get_item_location(int iteration, int side){
+        
         try{
             int[] relative_pos = itemCordShifted[iteration][side];
             //System.out.println("rel pos: " + relative_pos[0]+", "+relative_pos[1]);
@@ -142,7 +152,7 @@ abstract public class Belt extends Placable {
     //endregion
     
     //region setup
-    public static Belt makeBelt(Belt[][] beltGrid, int orientation, int[] oAround, int grid_x, int grid_y){
+    public static Belt makeBelt(BeltGrid beltGrid, int orientation, int[] oAround, int grid_x, int grid_y){
     
         int shape = checkBeltType(orientation, oAround);
         switch(shape){
@@ -203,6 +213,7 @@ abstract public class Belt extends Placable {
             return this.x + xMatrix[orientation][0] * x + xMatrix[orientation][1] * y + rotateOffsetMatrix[orientation][0] * 64 - 16;
         return this.y + yMatrix[orientation][0] * x + yMatrix[orientation][1] * y + rotateOffsetMatrix[orientation][1] * 64 - 16;
     }
+    
     private static void setLocation_straight(int[][][] itemCord){
         int x;
         int y;
@@ -389,12 +400,12 @@ abstract public class Belt extends Placable {
         return list_from_side.get(side);
     }
     public Belt beltsAround(int direction){
-        return Manager.beltGrid[grid_row + Manager.diff[direction][0]][grid_column + Manager.diff[direction][1]];
+        return beltGrid.get(grid_row + Manager.diff[direction][0], grid_column + Manager.diff[direction][1]);
     }
     public Belt[] getBeltsAround(){
         Belt[] belt_around = new Belt[4];
         for(int i = 0; i < 4; i++){
-            belt_around[i] = beltGrid[grid_row + Manager.diff[i][0]][grid_column + Manager.diff[i][1]];
+            belt_around[i] = beltGrid.get(grid_row + Manager.diff[i][0], grid_column + Manager.diff[i][1]);
         }
         return belt_around;
     }

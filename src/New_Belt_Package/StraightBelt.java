@@ -10,7 +10,7 @@ public class StraightBelt extends Belt {
     boolean rightBelt;
     boolean leftBelt;
 
-    public StraightBelt(Belt[][] beltGrid, int orientation, int grid_x, int grid_y) {
+    public StraightBelt(BeltGrid beltGrid, int orientation, int grid_x, int grid_y) {
         super(beltGrid, orientation, grid_x, grid_y);
         setAroundBooleans(getoAround());
         shape = straight;

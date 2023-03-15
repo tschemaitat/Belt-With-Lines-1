@@ -3,8 +3,11 @@ package New_Belt_Package;
 import java.util.List;
 
 public class Belt_List_Factory {
+	
 	public static int list_count = 0;
 	public static Belt_List construct_belt_list(Belt starting_belt, int starting_side, List<Belt_List> belt_lists){
+		Main_Class.log.log_line("making list id: "+list_count+" belt: " + starting_belt + " side: " + starting_side);
+		Main_Class.log.tab("making list");
 		//System.out.println("making list: " + list_count+" ---------");
 		//System.out.println("starting at: " + starting_belt.arrayIndex);
 		//System.out.println("making list: "+list_count+" ---------");
@@ -26,12 +29,15 @@ public class Belt_List_Factory {
 		boolean currently_adding = true;
 		//System.out.println("adding forwards");
 		while(currently_adding){
+			
 			Belt forward = current_belt.beltsAround(current_belt.orientation);
 			
 			//System.out.println("adding forward, belt: " + forward);
+			Main_Class.log.log_line("adding forward, belt: " + forward);
 			if(forward == null){
 				belt_list.set_output(new LocationStruct(-1, -1, null));
 				//System.out.println("forward null");
+				Main_Class.log.log_line("forward null");
 				break;
 			}
 			
@@ -53,6 +59,7 @@ public class Belt_List_Factory {
 			
 			//belts are facing eachother I think
 			if(can_output.value() == false){
+				Main_Class.log.log_line("cannot output");
 				//System.out.println("cannot output");
 				belt_list.set_output(new LocationStruct(-1, -1, null));
 				break;
@@ -61,13 +68,15 @@ public class Belt_List_Factory {
 			//if we aren't the priority, end the list
 			if(is_priority == false){
 				//System.out.println("not priority");
-				
+				Main_Class.log.log_line("not priority");
 				belt_list.set_output(new LocationStruct(new_position.value, new_side.value, forward));
 				//System.out.println("setting output: " + forward + " side: " + new_side.value + " pos: " + new_position.value);
+				Main_Class.log.log_line("setting output: " + forward + " side: " + new_side.value + " pos: " + new_position.value);
 				break;
 			}
 			//if the belt belongs in a list (circle i think) just set it as the output
 			if(forward.get_list(new_side.value) != null){
+				Main_Class.log.log_line("already in list");
 				//System.out.println("already in list");
 				belt_list.set_output(new LocationStruct(new_position.value, new_side.value, forward));
 				break;
@@ -76,6 +85,7 @@ public class Belt_List_Factory {
 			current_belt = forward;
 			current_side = new_side.value;
 		}
+		Main_Class.log.log_line("finished forwards");
 		//System.out.println("finished forwards");
 		currently_adding = true;
 		
@@ -110,7 +120,7 @@ public class Belt_List_Factory {
 		
 		//System.out.println("finished building list: (" +belt_list.size() + ")\n" + belt_list.belt_index_and_side());
 		
-		
+		Main_Class.log.untab("making list");
 		
 		list_count++;
 		return belt_list;

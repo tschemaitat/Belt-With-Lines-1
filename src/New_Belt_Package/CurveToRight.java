@@ -5,7 +5,7 @@ import static New_Belt_Package.First.Images.*;
 
 public class CurveToRight extends Belt {
 
-    public CurveToRight(Belt[][] beltGrid, int orientation, int grid_x, int grid_y) {
+    public CurveToRight(BeltGrid beltGrid, int orientation, int grid_x, int grid_y) {
         super(beltGrid, orientation, grid_x, grid_y);
         shape = curveToRight;
         shift_item_locations();
