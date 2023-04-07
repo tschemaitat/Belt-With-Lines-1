@@ -373,19 +373,16 @@ public class Belt_List {
 	public boolean add_item_by_position(int position, Item_In_List item){
 		if(has_item(position))
 			return false;
-		
 		//0,1,2,3
 		//add 4
 		//just add it on the end
 		//0,1,2
 		//add 4
 		//do loop to add empty 3-3
-		
 		if(items.size() == position){
 			items.add(item);
 			return true;
 		}
-		
 		if(items.size() < position){
 			for(int i = items.size(); i < position; i++){
 				items.add(Item_In_List.new_empty());
@@ -393,7 +390,6 @@ public class Belt_List {
 			items.add(item);
 			return true;
 		}
-		
 		items.remove(position);
 		items.add(position, item);
 		return true;

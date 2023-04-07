@@ -7,9 +7,9 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class Main_Class {
-	public static My_Log log;
+	//public static My_Log log;
 	public static void main(String []args){
-		log = new My_Log();
+		//log = new My_Log();
 //		System.out.println("adding hello: ");
 //		log.log_line("hello");
 //		log.log_line("hello2");
@@ -45,8 +45,8 @@ public class Main_Class {
 	
 	static int tick = 0;
 	public static void do_ticks(Manager manager, Graphics grf, Screen screen){
-		log.log_line("10 ticks");
-		log.tab("10 ticks");
+		//log.log_line("10 ticks");
+		//log.tab("10 ticks");
 		boolean first_tab = true;
 		while(1==1){
 			try {
@@ -72,24 +72,24 @@ public class Main_Class {
 			
 			if(tick%4 == 0){
 				if(!first_tab){
-					log.untab("tick");
+					//log.untab("tick");
 					if(tick%40 == 0 && tick != 0){
-						log.untab("10 ticks");
-						log.log_line("10 ticks: " + tick);
-						log.tab("10 ticks");
+						//log.untab("10 ticks");
+						//log.log_line("10 ticks: " + tick);
+						//log.tab("10 ticks");
 					}
 				}else
 					first_tab = false;
 				
-				log.log_line("tick: " + tick);
-				log.tab("tick");
+				//log.log_line("tick: " + tick);
+				//log.tab("tick");
 				manager.iterate_belt_lists();
 			}
 			
-			log.log_line("click tick: " + tick);
-			log.tab("click tick");
+			//log.log_line("click tick: " + tick);
+			//log.tab("click tick");
 			screen.pop_mouse_event_to_observe();
-			log.untab("click tick");
+			//log.untab("click tick");
 			screen.observe_mouse_touch();
 			
 			int iteration_into_tick = tick%4;//0,1,2,3

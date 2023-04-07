@@ -142,8 +142,8 @@ public class Manager {
 		}
 	}
 	private void build_lists(){
-		Main_Class.log.log_line("building lists");
-		Main_Class.log.tab("building lists");
+		//Main_Class.log.log_line("building lists");
+		//Main_Class.log.tab("building lists");
 		belt_lists = new ArrayList<>();
 		//belt_lists.add(Belt_List_Factory.construct_belt_list(belts.get(2), 0));
 		
@@ -168,7 +168,7 @@ public class Manager {
 		for(int i = 0; i < belt_lists.size(); i++)
 			belt_lists.get(i).second_compile();
 		
-		Main_Class.log.untab("building lists");
+		//Main_Class.log.untab("building lists");
 		
 	}
 	private void create_UI(){
@@ -397,14 +397,16 @@ public class Manager {
 		//if shape changed
 		//add around around for lists to delete
 		//replace belt
+		System.out.println("checking around for changed change");
+		System.out.println(around);
 		for(int i = 0; i < around.length; i++){
-			//System.out.println("direction of deleted belt from adjacent belt per: " + oppositeDirection);
+			System.out.println("belt around: " + around[i][0] + ", " + around[i][1]);
 			Belt belt_around = beltGrid.get(around[i][0], around[i][1]);
 			if(belt_around == null)
 				continue;
 			belts_whom_list_delete.add(belt_around);
 			if(belt_around.changed_shape()){
-				//System.out.println("belt: "+belt_around.arrayIndex + " changed shape");
+				System.out.println("belt: "+belt_around.arrayIndex + " changed shape");
 				Belt[] belt_around_around = belt_around.getBeltsAround();
 				for(int j = 0; j < 4; j++){
 					if(belt_around_around[j] == null)
@@ -425,8 +427,8 @@ public class Manager {
 		return Belt.makeBelt(beltGrid, belt_around.orientation, belt_around.getoAround(), belt_around.grid_row, belt_around.grid_column);
 	}
 	private void belt_deleteOrAdd_procedure(int grid_row, int grid_column, int direction_new_belt){
-		Main_Class.log.log_line("delete/add procedure: " + grid_column + ", " + grid_row);
-		Main_Class.log.tab("delete/add");
+		//Main_Class.log.log_line("delete/add procedure: " + grid_column + ", " + grid_row);
+		//Main_Class.log.tab("delete/add");
 		//delete belt
 		//delete lists in belt and adjacent belts
 		//check for changed shape in all adjacent belts
@@ -493,7 +495,7 @@ public class Manager {
 				add_item_to_list(item.belt, item.position, item.side);
 			}
 		}
-		Main_Class.log.untab("delete/add");
+		//Main_Class.log.untab("delete/add");
 	}
 	private List<List<ItemLocationStruct>> delete_lists_of_belts(List<Belt> belts){
 		List<List<ItemLocationStruct>> itemToBeReplaced = new ArrayList<>();

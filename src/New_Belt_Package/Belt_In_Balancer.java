@@ -3,7 +3,7 @@ package New_Belt_Package;
 import static New_Belt_Package.First.Enum.*;
 import static New_Belt_Package.First.Enum.right;
 
-public class Belt_In_Balancer extends StraightBelt {
+public class Belt_In_Balancer extends Belt {
 	public Belt_In_Balancer sibling_belt;
 	public boolean left_belt_of_balancer;
 	boolean[][] in_list = new boolean[][]{{false, false},{false, false}};
