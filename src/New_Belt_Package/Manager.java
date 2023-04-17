@@ -678,9 +678,6 @@ public class Manager {
 		grf.drawImage(balancer.image, balancer.x, balancer.y, null);
 		
 		for(int i = 0; i < belts.size(); i++){
-			if(belts.get(i) instanceof Belt_In_Balancer){
-				continue;
-			}
 			draw_belt(grf, belts.get(i), false);
 		}
 	}

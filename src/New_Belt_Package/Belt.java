@@ -226,6 +226,7 @@ public class Belt implements Placeable{
             case straight -> setImage_straight();
             case curveToLeft -> setImage_CurveToLeft();
             case curveToRight -> setImage_curve_to_right();
+            default -> new RuntimeException();
         }
     }
     public void shift_item_locations(){
