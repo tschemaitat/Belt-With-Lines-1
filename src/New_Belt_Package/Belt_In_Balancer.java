@@ -3,36 +3,25 @@ package New_Belt_Package;
 import static New_Belt_Package.First.Enum.*;
 import static New_Belt_Package.First.Enum.right;
 
-public class Belt_In_Balancer extends Belt {
-	public Belt_In_Balancer sibling_belt;
+public class Belt_In_Balancer extends StraightBelt {
 	public boolean left_belt_of_balancer;
-	boolean[][] in_list = new boolean[][]{{false, false},{false, false}};
+	public boolean front_of_balancer;
 	
-	public Belt_In_Balancer(BeltGrid beltGrid, int orientation, int grid_x, int grid_y, boolean is_left) {
-		super(beltGrid, orientation, grid_x, grid_y);
+	public Belt_In_Balancer(int orientation, int grid_x, int grid_y, boolean is_left, boolean is_front){
+		super(null, orientation, grid_x, grid_y);
 		left_belt_of_balancer = is_left;
+		front_of_balancer = is_front;
 	}
 	
-	public boolean has_list(boolean front, int side){
-		int front_num = 0;
-		if(!front)
-			front_num = 1;
-		
-		return in_list[front_num][side];
-	}
+	
 	@Override
 	public int max_items(int side){
 		return items_per_side_straight/2;
 	}
 	
-	boolean getting_item_front;
-	public void set_get_item_location_FrontOrBack(boolean front){
-		getting_item_front = front;
-	}
-	
 	public int[] get_item_location_balancer(int iteration, int side){
 		//this make it look at the front of the belt
-		if(getting_item_front)
+		if(front_of_balancer)
 			iteration += iterations_per_position * 4;
 		
 		try{
@@ -49,21 +38,9 @@ public class Belt_In_Balancer extends Belt {
 		
 	}
 	
-	public void set_has_list(boolean front, int side){
-		int front_num = 0;
-		if(!front)
-			front_num = 1;
-		
-		in_list[front_num][side] = true;
-	}
-	
-	public void set_sibling(Belt_In_Balancer sibling){
-		sibling_belt = sibling;
-	}
-	
 	//this belt is unique in that it will only connect with the belts above and below it
 	public boolean getInputPriorityAndSide(Belt belt, int side, IntWrap newSide, IntWrap newPosition, BooleanWrap can_output){
-		//setAroundBooleans(getoAround());
+		setAroundBooleans(getoAround());
 		
 		if(belt == beltsAround((down + orientation)%4)){
 			can_output.set(true);
@@ -123,5 +100,21 @@ public class Belt_In_Balancer extends Belt {
 			return 1;
 		return 0;
 		
+	}
+	public String vert(){
+		if(front_of_balancer){
+			return "top";
+		}
+		return "bot";
+	}
+	
+	public String hor() {
+		if (left_belt_of_balancer)
+			return "left";
+		return "right";
+	}
+	
+	public String toString(){
+		return "<balancer belt, "+vert()+", "+hor()+"  "+grid_row+", "+grid_column+">";
 	}
 }

@@ -7,10 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static New_Belt_Package.First.Enum.*;
-import static New_Belt_Package.First.Images.*;
-import static New_Belt_Package.First.Images.beltDownToLeftImage;
 
-public class Belt implements Placeable{
+abstract public class Belt{
     public static final int length = 64;
     public static final int horizontalItemPosition = 19;
     public static final int itemSize = 32;
@@ -19,10 +17,6 @@ public class Belt implements Placeable{
     public static final int items_long_side = items_per_belt*3/4;
     public static final int items_short_side = items_per_belt/4;
     public static final int iterations_per_position = 4;
-    
-    public static final int straight = 0;
-    public static final int curveToLeft = 1;
-    public static final int curveToRight = 2;
     BufferedImage image;
     int shape;
     int orientation;
@@ -31,7 +25,7 @@ public class Belt implements Placeable{
     
     int grid_row;
     int grid_column;
-    private Belt_List[] list_from_side;
+    private List<Belt_List> list_from_side;
     int arrayIndex;
     int[][][] itemCordShifted;
     
@@ -42,10 +36,10 @@ public class Belt implements Placeable{
     
     static boolean setup = false;
     static int belt_count = 0;
-    Belt[] belt_around;
+    Belt[] belts_around;
     
-    public Belt(Belt[] belt_around, int orientation, int grid_row, int grid_column) {
-        this.belt_around = belt_around;
+    public Belt(Belt[] belts_around, int orientation, int grid_row, int grid_column) {
+        this.belts_around = belts_around;
         //System.out.println("("+grid_row+","+grid_column+") making belt: " + belt_count + " @@@@@@@@@@@@@@@@@@@");
         shape = -1;
         arrayIndex = belt_count;
@@ -57,27 +51,24 @@ public class Belt implements Placeable{
         this.y = pixel[0];
         setImage();
         itemCordShifted = new int[items_per_belt*iterations_per_position][2][2];
-        list_from_side = new Belt_List[]{null, null};
+        list_from_side = new ArrayList<>();
+        list_from_side.add(null);
+        list_from_side.add(null);
         if(!setup){
             setup = true;
             setup();
         }
         belt_count++;
-        //System.out.println(belt_count);
     }
     
     
     public int[][] get_affected_around() {
-        int[][] result = new int[4][2];
-        for(int i = 0; i < result.length; i++){
-            result[i][0] = Manager.diff[i][0] + grid_row;
-            result[i][1] = Manager.diff[i][1] + grid_column;
+        int[][] around = new int[4][2];
+        for(int i = 0; i < around.length; i++){
+            around[i][0] = this.grid_row + Manager.diff[i][0];
+            around[i][1] = this.grid_column + Manager.diff[i][1];
         }
-        return result;
-    }
-    
-    public int[] get_extra_space_taken(){
-        return new int[]{0, 0};
+        return around;
     }
     
     public int[] get_item_location(int iteration, int side){
@@ -98,42 +89,25 @@ public class Belt implements Placeable{
     
     //region setters
     public void add_to_list(int side, Belt_List list){
-        list_from_side[side] = list;
+        list_from_side.remove(side);
+        list_from_side.add(side, list);
     }
     public void remove_list(int side){
-        list_from_side[side] = null;
+        list_from_side.remove(side);
+        list_from_side.add(side, null);
+    }
+    public void set_belts_around(Belt[] belts_around){
+        this.belts_around = belts_around;
+    }
+    
+    public void set_belts_around(BeltGrid beltGrid){
+        belts_around = get_belts_from_grid(beltGrid, grid_row, grid_column, orientation);
     }
     //endregion
     
     //region for list building
-    public boolean getInputPriorityAndSide(Belt belt, int side, IntWrap newSide, IntWrap newPosition, BooleanWrap can_output){
-        switch(shape){
-            case straight -> {
-                return getInputPriorityAndSide_straight(belt, side, newSide, newPosition, can_output);
-            }
-            case curveToLeft -> {
-                return getInputPriorityAndSide_CurveToLeft(belt, side, newSide, newPosition, can_output);
-            }
-            case curveToRight -> {
-                return getInputPriorityAndSide_curve_to_right(belt, side, newSide, newPosition, can_output);
-            }
-        }
-        throw new RuntimeException();
-    }
-    public Belt getInputBeltAndSide(int side, IntWrap newSide){
-        switch(shape){
-            case straight -> {
-                return getInputBeltAndSide_straight(side, newSide);
-            }
-            case curveToLeft -> {
-                return getInputBeltAndSide_CurveToLeft(side, newSide);
-            }
-            case curveToRight -> {
-                return getInputBeltAndSide_curve_to_right(side, newSide);
-            }
-        }
-        throw new RuntimeException();
-    }
+    abstract public boolean getInputPriorityAndSide(Belt belt, int side, IntWrap newSide, IntWrap newPosition, BooleanWrap can_output);
+    abstract public Belt getInputBeltAndSide(int side, IntWrap newSide);
     //endregion
     
     //region for belt/list editing
@@ -185,18 +159,57 @@ public class Belt implements Placeable{
     //endregion
     
     //region setup
-    public static Belt makeBelt(Belt[] belt_around, int orientation, int[] oAround, int grid_x, int grid_y){
-        int shape = checkBeltType(orientation, oAround);
-        return new Belt(belt_around, orientation, grid_x, grid_y);
+    public static Belt makeBelt(BeltGrid beltGrid, int orientation, int grid_x, int grid_y){
+        
+        return makeBelt(get_belts_from_grid(beltGrid, grid_x, grid_y, orientation), orientation, grid_x, grid_y);
     }
-    public static Belt makeBelt(BeltGrid grid, int orientation, int[] oAround, int grid_x, int grid_y){
-        int shape = checkBeltType(orientation, oAround);
-        Belt[] belt_around = new Belt[4];
+    
+    public static Belt[] get_belts_from_grid(BeltGrid beltGrid, int grid_x, int grid_y, int orientation){
+        Belt[] belts_around = new Belt[4];
         for(int i = 0; i < 4; i++){
-            belt_around[i] = grid.get(grid_x + Manager.diff[i][0], grid_y + Manager.diff[i][1]);
+            Placeable building = beltGrid.get(grid_x + Manager.diff[i][0], grid_y + Manager.diff[i][1]);
+            
+            if(building == null)
+                continue;
+            if(building instanceof Placeable_Belt){
+                belts_around[i] = ((Placeable_Belt)building).belt;
+                continue;
+            }
+            
+            Balancer balancer = (Balancer) building;
+            belts_around[i] = balancer.get_belt(grid_x, grid_y, (i + 2)%4);
         }
-        return new Belt(belt_around, orientation, grid_x, grid_y);
+        return belts_around;
     }
+    
+    public static Belt makeBelt(Belt[] belts_around, int orientation, int grid_x, int grid_y){
+        int[] oAround = new int[4];
+        for(int i = 0; i < 4; i++){
+            if(belts_around[i] == null){
+                oAround[i] = -1;
+                continue;
+            }
+            oAround[i] =  belts_around[i].orientation;
+        }
+        int shape = checkBeltType(orientation, oAround);
+        return makeBelt_from_shape(belts_around, orientation, shape, grid_x, grid_y);
+    }
+    
+    public static Belt makeBelt(int orientation, int[] oAround, int grid_x, int grid_y){
+        int shape = checkBeltType(orientation, oAround);
+        return makeBelt_from_shape(null, orientation, shape, grid_x, grid_y);
+    }
+    
+    public static Belt makeBelt_from_shape(Belt[] belts_around, int orientation, int shape, int grid_x, int grid_y){
+        switch(shape){
+            case straight: return new StraightBelt(belts_around, orientation, grid_x, grid_y);
+            case curveToLeft: return new CurveToLeft(belts_around, orientation, grid_x, grid_y);
+            case curveToRight: return new CurveToRight(belts_around, orientation, grid_x, grid_y);
+        }
+        throw new RuntimeException();
+    }
+    
+    
     private static void setup(){
         int straight_length_short = 0;
         int straight_length_long = 24;
@@ -221,14 +234,9 @@ public class Belt implements Placeable{
         }
         setLocation_straight(straightCordRelative);
     }
-    public void setImage(){
-        switch(shape){
-            case straight -> setImage_straight();
-            case curveToLeft -> setImage_CurveToLeft();
-            case curveToRight -> setImage_curve_to_right();
-            default -> new RuntimeException();
-        }
-    }
+
+    abstract public void setImage();
+
     public void shift_item_locations(){
         int[][][] rel_itemCord;
         if(shape == straight)
@@ -400,34 +408,8 @@ public class Belt implements Placeable{
         }
         return around;
     }
-    public int max_items(int side){
-        switch(shape){
-            case straight -> {
-                return max_items_straight(side);
-            }
-            case curveToLeft -> {
-                return max_items_CurveToLeft(side);
-            }
-            case curveToRight -> {
-                return max_items_curve_to_right(side);
-            }
-        }
-        throw new RuntimeException();
-    }
-    public int getLengthFromSide(int side){
-        switch(shape){
-            case straight -> {
-                return getLengthFromSide_straight(side);
-            }
-            case curveToLeft -> {
-                return getLengthFromSide_CurveToLeft(side);
-            }
-            case curveToRight -> {
-                return getLengthFromSide_curve_to_right(side);
-            }
-        }
-        throw new RuntimeException();
-    }
+    public abstract int max_items(int side);
+    abstract public int getLengthFromSide(int side);
     public static String shape_from_int(int shape){
         if(shape == straight)
             return "st";
@@ -448,7 +430,7 @@ public class Belt implements Placeable{
         return left;
     }
     public Belt_List get_list(int side){
-        return list_from_side[side];
+        return list_from_side.get(side);
     }
     public int[] getoAround(){
         return beltToIntAround(getBeltsAround());
@@ -465,196 +447,13 @@ public class Belt implements Placeable{
         return s;
     }
     public Belt_List get_list_from_side(int side){
-        return list_from_side[side];
+        return list_from_side.get(side);
     }
     public Belt beltsAround(int direction){
-        return belt_around[direction];
+        return belts_around[direction];
     }
     public Belt[] getBeltsAround(){
-        return belt_around;
-    }
-    //endregion
-    
-    //region curve to left
-    public int max_items_CurveToLeft(int side){
-        if(side == 0)
-            return items_short_side;
-        return items_long_side;
-    }
-    public void setImage_CurveToLeft(){
-        switch(orientation){
-            case 0: image = beltLeftToUpImage; break;
-            case 1: image = beltUpToRightImage; break;
-            case 2: image = beltRightToDownImage; break;
-            case 3: image = beltDownToLeftImage; break;
-        }
-    }
-    public boolean getInputPriorityAndSide_CurveToLeft(Belt belt, int side, IntWrap newSide, IntWrap newPosition, BooleanWrap can_output){
-        if(belt == beltsAround((left + orientation)%4))
-            can_output.set(true);
-        else
-            can_output.set(false);
-        
-        
-        newPosition.value = 0;
-        newSide.value = side;
-        return true;
-    }
-    public Belt getInputBeltAndSide_CurveToLeft(int side, IntWrap newSide){
-        newSide.value = side;
-        return beltsAround((left + orientation)%4);
-    }
-    public int getLengthFromSide_CurveToLeft(int side){
-        return 6 - 2 * side / 3;
-    }
-    //endregion
-    
-    //region curve to right
-    public int max_items_curve_to_right(int side){
-        if(side == 1)
-            return items_short_side;
-        return items_long_side;
-    }
-    public void setImage_curve_to_right(){
-        switch(orientation){
-            case 0: image = beltRightToUpImage; break;
-            case 1: image = beltDownToRightImage; break;
-            case 2: image = beltLeftToDownImage; break;
-            case 3: image = beltUpToLeftImage; break;
-        }
-    }
-    public int[] getLocation_curve_to_right(int position){
-        return new int[]{0,0};
-    }
-    public boolean getInputPriorityAndSide_curve_to_right(Belt belt, int side, IntWrap newSide, IntWrap newPosition, BooleanWrap can_output){
-        if(belt == beltsAround((right + orientation)%4))
-            can_output.set(true);
-        else
-            can_output.set(false);
-        newPosition.value = 0;
-        newSide.value = side;
-        return true;
-    }
-    public Belt getInputBeltAndSide_curve_to_right(int side, IntWrap newSide){
-        newSide.value = side;
-        return beltsAround((right + orientation)%4);
-    }
-    public int getLengthFromSide_curve_to_right(int side){
-        return 2 + 4 * (side / 3);
-    }
-    //endregion
-    
-    //region straight
-    boolean backBelt;
-    boolean rightBelt;
-    boolean leftBelt;
-    protected void setAroundBooleans(int[] oAround){
-        backBelt = false;
-        rightBelt = false;
-        leftBelt = false;
-        if(oAround[(down + orientation)%4] == (up + orientation)%4){
-            backBelt = true;
-            if(arrayIndex == 19){
-                //System.out.println("BACKBELT IS TRUE");
-            }
-        }
-        if(oAround[(left + orientation)%4] == (right + orientation)%4){
-            leftBelt = true;
-        }
-        if(oAround[(right + orientation)%4] == (left + orientation)%4){
-            rightBelt = true;
-        }
-    }
-    public void setImage_straight(){
-        switch(orientation){
-            case up: image = beltUpImage;
-                break;
-            case right: image = beltRightImage;
-                break;
-            case down: image = beltDownImage;
-                break;
-            case left: image = beltLeftImage;
-                break;
-        }
-    }
-    public int max_items_straight(int side){
-        return items_per_side_straight;
-    }
-    public boolean getInputPriorityAndSide_straight(Belt belt, int side, IntWrap newSide, IntWrap newPosition, BooleanWrap can_output){
-        setAroundBooleans(getoAround());
-        
-        if(belt != beltsAround((up + orientation)%4)){
-            can_output.set(true);
-        }
-        else{
-            can_output.set(false);
-            System.out.println(this.arrayIndex + " setting can_output to false");
-        }
-        
-        
-        
-        
-        int direction = 0;
-        for(int i = 0; i < 4; i++){
-            if(beltsAround(i) == belt){
-                direction = i;
-                break;
-            }
-            else if(i == 3)
-                System.out.println("Belt could not find direction of backwardBelt ThisBelt: " + toString() + " other belt: " + belt);
-        }
-        if(direction == (left + orientation)%4){
-            newSide.value = 0;
-            
-            if(side == 1){
-                newPosition.value = 0;
-                if(backBelt)
-                    return false;
-                return true;
-            }
-            newPosition.value = items_per_side_straight/2 + 1;
-            return false;
-        }
-        if(direction == (right + orientation)%4){
-            newSide.value = 1;
-            if(backBelt)
-                return false;
-            if(side == 0){
-                newPosition.value = 0;
-                return true;
-            }
-            newPosition.value = items_per_side_straight/2 + 1;
-            return false;
-        }
-        newSide.value = side;
-        return true;
-    }
-    public Belt getInputBeltAndSide_straight(int side, IntWrap newSide){
-        setAroundBooleans(getoAround());
-        //if we have a back belt, the priority input is the like sides of that back belt
-        if(backBelt){
-            newSide.value = side;
-            //System.out.println("Straight belt going strsight behind");
-            return beltsAround((down + orientation)%4);
-        }
-        //if left belt, our priority input on the left will be that left belt and comes from the right side
-        if(side == 0 && leftBelt){
-            newSide.value = 1;
-            //System.out.println("Straight belt going left");
-            return beltsAround((left + orientation)%4);
-        }
-        if(side == 1 && rightBelt){
-            newSide.value = 0;
-            //System.out.println("Straight belt going left");
-            return beltsAround((right + orientation)%4);
-        }
-        //for a given side, we do not have a priority input
-        //System.out.println("Straight belt no input");
-        return null;
-    }
-    //64/(4*2) = 8  64-8-2=54
-    public int getLengthFromSide_straight(int side){
-        return 4;
+        return belts_around;
     }
     //endregion
     

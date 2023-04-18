@@ -116,12 +116,12 @@ public class Belt_List {
 			}
 			//we get iterations_per_position - 1 cordinates from the backwards position
 			//we get a final coordinate from our current position
-			if(index_belt == 0 && belt instanceof Belt_In_Balancer){
-				((Belt_In_Balancer) belt).getting_item_front = false;
-			}
-			if(index_belt == belts.size() - 1 && belt instanceof Belt_In_Balancer){
-				((Belt_In_Balancer) belt).getting_item_front = true;
-			}
+//			if(index_belt == 0 && belt instanceof Belt_In_Balancer){
+//				((Belt_In_Balancer) belt).getting_item_front = false;
+//			}
+//			if(index_belt == belts.size() - 1 && belt instanceof Belt_In_Balancer){
+//				((Belt_In_Balancer) belt).getting_item_front = true;
+//			}
 			
 			
 			
@@ -321,7 +321,7 @@ public class Belt_List {
 			int y1 = list_cord.get(i)[1] + Belt.itemSize/2;
 			int x2 = list_cord.get(i+1)[0] + Belt.itemSize/2;
 			int y2 = list_cord.get(i+1)[1] + Belt.itemSize/2;
-			grf.drawLine(x1, y1, x2, y2);
+			grf.drawLine(x1 - Manager.cameraX, y1 - Manager.cameraY, x2 - Manager.cameraX, y2 - Manager.cameraY);
 			/*
 			if(i%4 == 0 && i != 0)
 				System.out.println();
@@ -373,16 +373,19 @@ public class Belt_List {
 	public boolean add_item_by_position(int position, Item_In_List item){
 		if(has_item(position))
 			return false;
+		
 		//0,1,2,3
 		//add 4
 		//just add it on the end
 		//0,1,2
 		//add 4
 		//do loop to add empty 3-3
+		
 		if(items.size() == position){
 			items.add(item);
 			return true;
 		}
+		
 		if(items.size() < position){
 			for(int i = items.size(); i < position; i++){
 				items.add(Item_In_List.new_empty());
@@ -390,6 +393,7 @@ public class Belt_List {
 			items.add(item);
 			return true;
 		}
+		
 		items.remove(position);
 		items.add(position, item);
 		return true;

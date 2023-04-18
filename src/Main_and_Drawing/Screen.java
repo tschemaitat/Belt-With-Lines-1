@@ -1,16 +1,21 @@
 package Main_and_Drawing;
 
+import Main_and_Drawing.Layouts.KeyEvent_Edited;
+
 import javax.swing.*;
 
 
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Screen extends JPanel {
+public class Screen extends JPanel implements KeyListener {
     JFrame frame;
     Stack_Layout stack;
     List<MouseEvent_Edited> mouse_events;
+    List<KeyEvent_Edited> key_events;
     
     Command external_drawer;
     Graphics current_graphics = null;
@@ -18,6 +23,7 @@ public class Screen extends JPanel {
     public Point mouse_point;
     public Screen(int width, int height){
         mouse_events = new ArrayList<>();
+        key_events = new ArrayList<>();
         frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         //adds this "drawer" object to frame
@@ -25,7 +31,9 @@ public class Screen extends JPanel {
         frame.setSize(width, height);
         frame.setLocation(200, 10);
         frame.setVisible(true);
-
+        setFocusable(true);
+        addKeyListener(this);
+        
         //this calls paintComponent
         //frame.repaint
 
@@ -158,5 +166,30 @@ public class Screen extends JPanel {
     public void update_screen(){
         //mouse_point = MouseInfo.getPointerInfo().getLocation();
         frame.repaint();
+    }
+    
+    public KeyEvent_Edited pop_keyboard(){
+        return key_events.remove(0);
+    }
+    
+    public boolean has_keyboard(){
+        return key_events.size() > 0;
+    }
+    
+    @Override
+    public void keyTyped(KeyEvent e) {
+        System.out.println("key types");
+    }
+    
+    @Override
+    public void keyPressed(KeyEvent e) {
+        System.out.println("key pressed: " + e.getKeyChar());
+        key_events.add(new KeyEvent_Edited(e, true));
+    }
+    
+    @Override
+    public void keyReleased(KeyEvent e) {
+        System.out.println("key released: " + e.getKeyChar());
+        key_events.add(new KeyEvent_Edited(e, false));
     }
 }

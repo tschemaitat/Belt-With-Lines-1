@@ -347,6 +347,9 @@ public class My_Log{
 				}
 			return total;
 		}
+		
+		
+		
 	}
 	
 	public static java java(){

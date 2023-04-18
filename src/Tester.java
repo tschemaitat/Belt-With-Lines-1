@@ -1,5 +1,4 @@
 import New_Belt_Package.Balancer;
-import New_Belt_Package.Belt;
 import New_Belt_Package.BeltGrid;
 import org.junit.Test;
 
@@ -16,7 +15,7 @@ public class Tester {
 		BeltGrid belt_grid = new BeltGrid();
 		for(int i = 0; i  < 4; i++){
 			Balancer balancer = new Balancer(belt_grid, 3, 3, i);
-			int[] space = balancer.get_extra_space_taken();
+			int[] space = balancer.space_taken();
 			int[][] diff = balancer.get_affected_around();
 			System.out.println("space: " + new Point(space[0], space[1]));
 			for(int around = 0; around < 4; around++)

@@ -34,14 +34,17 @@ public class Manager {
 	};
 	
 	
-	int cameraX = 0;
-	int cameraY = 0;
+	public static int cameraX = 0;
+	public static int cameraY = 0;
 	int tick = 0;
 	int timesDraw = 0;
 	Layout layout;
 	
+	boolean key_down = false;
+	char key_that_is_down = 'z';
+	
 	List<Belt_List> belt_lists;
-	List<Belt> belts = new ArrayList<>();
+	
 	public static BeltGrid beltGrid;
 	public boolean touching_belt_layer = false;
 	Screen screen;
@@ -81,41 +84,67 @@ public class Manager {
 			belt_lists.get(i).iterate_items(belt_lists.get(i).self_index);
 		}
 	}
+	public void do_graphical_tick(){
+		if(key_down){
+			switch(key_that_is_down){
+				case 'w':{
+					//System.out.println("key pressed is w");
+					cameraY = cameraY - 10;
+					break;
+				}
+				case 's':{
+					//System.out.println("key pressed is s");
+					cameraY += 10;
+					break;
+				}
+				case 'a':{
+					cameraX -= 10;
+					break;
+				}
+				case 'd':{
+					//System.out.println("d is pressed");
+					cameraX += 10;
+					break;
+				}
+			}
+		}
+		//System.out.println("key down?" + key_down + ", key: " +key_that_is_down);
+		//System.out.println("cameraX: " + cameraX + ", cameraY" + cameraY);
+	}
 	//endregion
 	
 	//region setup
 	private void add_items(){
 		//System.out.println("adding items");
-		add_item_to_list(belts.get(2), 1, 1);
-		add_item_to_list(belts.get(2), 1, 1);
-		add_item_to_list(belts.get(3), 0, 1);
-		add_item_to_list(belts.get(3), 1, 1);
-		add_item_to_list(belts.get(1), 0, 0);
-		add_item_to_list(belts.get(1), 3, 0);
-		add_item_to_list(belts.get(6), 0, 0);
-		add_item_to_list(belts.get(6), 2, 0);
-		add_item_to_list(belts.get(6), 3, 0);
-		add_item_to_list(belts.get(6), 4, 0);
+		add_item_to_list(beltGrid.belts.get(2), 1, 1);
+		add_item_to_list(beltGrid.belts.get(2), 1, 1);
+		add_item_to_list(beltGrid.belts.get(3), 0, 1);
+		add_item_to_list(beltGrid.belts.get(3), 1, 1);
+		add_item_to_list(beltGrid.belts.get(1), 0, 0);
+		add_item_to_list(beltGrid.belts.get(1), 3, 0);
+		add_item_to_list(beltGrid.belts.get(6), 0, 0);
+		add_item_to_list(beltGrid.belts.get(6), 2, 0);
+		add_item_to_list(beltGrid.belts.get(6), 3, 0);
+		add_item_to_list(beltGrid.belts.get(6), 4, 0);
 		
-		add_item_to_list(belts.get(14), 0, 0);
-		add_item_to_list(belts.get(14), 2, 0);
-		add_item_to_list(belts.get(14), 3, 0);
-		add_item_to_list(belts.get(14), 0, 1);
-		add_item_to_list(belts.get(14), 2, 1);
-		add_item_to_list(belts.get(14), 3, 1);
+		add_item_to_list(beltGrid.belts.get(14), 0, 0);
+		add_item_to_list(beltGrid.belts.get(14), 2, 0);
+		add_item_to_list(beltGrid.belts.get(14), 3, 0);
+		add_item_to_list(beltGrid.belts.get(14), 0, 1);
+		add_item_to_list(beltGrid.belts.get(14), 2, 1);
+		add_item_to_list(beltGrid.belts.get(14), 3, 1);
 		
-		add_item_to_list(belts.get(17), 0, 0);
-		add_item_to_list(belts.get(17), 2, 0);
-		//add_item_to_list(17, 3, 0);
-		add_item_to_list(belts.get(12), 0, 0);
-		add_item_to_list(belts.get(12), 1, 0);
-		add_item_to_list(belts.get(17), 0, 1);
-		add_item_to_list(belts.get(12), 2, 1);
-		add_item_to_list(belts.get(12), 3, 1);
-		add_item_to_list(belts.get(12), 0, 1);
-		add_item_to_list(belts.get(12), 1, 1);
-		add_item_to_list(belts.get(17), 4, 0);
-		add_item_to_list(belts.get(17), 5, 0);
+		add_item_to_list(beltGrid.belts.get(17), 0, 0);
+		add_item_to_list(beltGrid.belts.get(17), 2, 0);
+		//add_item_to_list(17, 3, 0);		add_item_to_list(belts.get(12).belt, 0, 0);
+		add_item_to_list(beltGrid.belts.get(12), 1, 0);
+		add_item_to_list(beltGrid.belts.get(17), 0, 1);
+		add_item_to_list(beltGrid.belts.get(12), 2, 1);
+		add_item_to_list(beltGrid.belts.get(12), 3, 1);
+		add_item_to_list(beltGrid.belts.get(12), 0, 1);
+		add_item_to_list(beltGrid.belts.get(12), 1, 1);
+		add_item_to_list(beltGrid.belts.get(17), 4, 0);
+		add_item_to_list(beltGrid.belts.get(17), 5, 0);
 		
 		
 		
@@ -131,12 +160,25 @@ public class Manager {
 			for(int j = 1; j < width - 1; j++){
 				
 				if(beltMap[i][j] != -1){
-					Belt belt = make_belt_from_grid(i, j);
-					beltGrid.add(i, j, belt);
+					int[] oAround = new int[4];
+					for(int around = 0; around < 4; around++){
+						oAround[around] = beltMap[i + Manager.diff[around][0]][j + Manager.diff[around][1]];
+					}
+					Placeable_Belt belt = new Placeable_Belt(beltGrid, Belt.makeBelt(beltMap[i][j], oAround, i, j));
+					beltGrid.add_to_manager(belt);
+					
 					//System.out.println(i+", "+j+" x: "+beltGrid[i][j].x+" y: "+beltGrid[i][j].y);
-					belts.add(belt);
+					
 					//beltGrid[i][j].setLocation();
 					index++;
+				}
+			}
+		}
+		for(int i = 1; i < height - 1; i++){
+			for(int j = 1; j < width - 1; j++){
+				
+				if(beltMap[i][j] != -1){
+					beltGrid.get_belt(i, j).belt.set_belts_around(beltGrid);
 				}
 			}
 		}
@@ -147,18 +189,18 @@ public class Manager {
 		belt_lists = new ArrayList<>();
 		//belt_lists.add(Belt_List_Factory.construct_belt_list(belts.get(2), 0));
 		
-		for(int i = 0; i < belts.size(); i++){
-			if(belts.get(i).get_list(0) == null){
+		for(int i = 0; i < beltGrid.belts.size(); i++){
+			if(beltGrid.belts.get(i).get_list(0) == null){
 				//System.out.println("making list: (" + i +", 0)~~~~~~~~~~~");
-				Belt_List belt_list = Belt_List_Factory.construct_belt_list(belts.get(i), 0, belt_lists);
+				Belt_List belt_list = Belt_List_Factory.construct_belt_list(beltGrid.belts.get(i), 0, belt_lists);
 				belt_lists.add(belt_list);
 			}
 			
 		}
-		for(int i = 0; i < belts.size(); i++){
-			if(belts.get(i).get_list(1) == null){
+		for(int i = 0; i < beltGrid.belts.size(); i++){
+			if(beltGrid.belts.get(i).get_list(1) == null){
 				//System.out.println("making list: (" + i +", 1)~~~~~~~~~~~");
-				Belt_List belt_list = Belt_List_Factory.construct_belt_list(belts.get(i), 1, belt_lists);
+				Belt_List belt_list = Belt_List_Factory.construct_belt_list(beltGrid.belts.get(i), 1, belt_lists);
 				belt_lists.add(belt_list);
 			}
 			
@@ -167,9 +209,6 @@ public class Manager {
 			belt_lists.get(i).compile();
 		for(int i = 0; i < belt_lists.size(); i++)
 			belt_lists.get(i).second_compile();
-		
-		//Main_Class.log.untab("building lists");
-		
 	}
 	private void create_UI(){
 		LayoutParameters params_bottom_layer = new RectP(0, 0, layout.getWidth(), layout.getHeight());
@@ -192,7 +231,7 @@ public class Manager {
 					touching_belt_layer = true;
 				}
 				
-				System.out.println(name+ " got mouse event " + event.type() + " (" + event.x() +", " + event.y()+")");
+				//System.out.println(name+ " got mouse event " + event.type() + " (" + event.x() +", " + event.y()+")");
 				if(event.type == MouseEvent_Edited.type_click) {
 					System.out.println("adding or deleting a belt");
 					int x = event.x();
@@ -216,9 +255,9 @@ public class Manager {
 			
 			@Override
 			public void onMouseEvent(MouseEvent_Edited event) {
-				System.out.println(name+ " got mouse event " + event.type() + " (" + event.x() +", " + event.y()+")");
-				if(event.type == MouseEvent_Edited.type_touch)
-					System.out.println("touched");
+				//System.out.println(name+ " got mouse event " + event.type() + " (" + event.x() +", " + event.y()+")");
+				//if(event.type == MouseEvent_Edited.type_touch)
+					//System.out.println("touched");
 				
 				
 				if(event.type == MouseEvent_Edited.type_click) {
@@ -273,7 +312,7 @@ public class Manager {
 			
 			@Override
 			public void onMouseEvent(MouseEvent_Edited event) {
-				System.out.println(name+ " got mouse event " + event.type() + " (" + event.x() +", " + event.y()+")");
+				//System.out.println(name+ " got mouse event " + event.type() + " (" + event.x() +", " + event.y()+")");
 			}
 		};
 		list_debug.name = "list_debug";
@@ -356,39 +395,6 @@ public class Manager {
 	//endregion
 	
 	//region add/deleting belts and lists
-	private Belt make_belt_from_grid(int i, int j){
-		return Belt.makeBelt(beltGrid, beltMap[i][j], new int[]{
-						beltMap[i - 1][j], beltMap[i][j + 1],
-						beltMap[i + 1][j], beltMap[i][j - 1]},
-				i, j);
-	}
-	private Belt make_belt_from_map(int row, int column, int orientation){
-		int[] oAround = new int[4];
-		for(int i = 0; i < 4; i++){
-			oAround[i] = -1;
-			int temp_row = row + diff[i][0];
-			int temp_column = column + diff[i][1];
-			if(beltGrid.get(temp_row, temp_column) != null)
-				oAround[i] = beltGrid.get(temp_row, temp_column).orientation;
-		}
-		
-		
-		return Belt.makeBelt(beltGrid, orientation, oAround,
-				row, column);
-	}
-	private void remove_belt_from_manager(Belt belt, Belt new_belt){
-		//if deleting a belt
-		if(belt != null){
-			beltGrid.remove(belt.grid_row, belt.grid_column);
-			belts.remove(belt);
-			System.out.println("removing belt: " + belt.arrayIndex + "from manager");
-		}
-		if(new_belt != null){
-			beltGrid.add(new_belt.grid_row, new_belt.grid_column, new_belt);
-			belts.add(new_belt);
-			System.out.println("adding belt: " + new_belt.arrayIndex + "to manager");
-		}
-	}
 	private void check_around_for_changed_shape(List<Belt> belts_whom_list_delete, int[][] around){
 		//System.out.println("check around for changed shape: " + center_belt.arrayIndex);
 		//we are adding or deleting a belt
@@ -397,74 +403,86 @@ public class Manager {
 		//if shape changed
 		//add around around for lists to delete
 		//replace belt
-		System.out.println("checking around for changed change");
-		System.out.println(around);
 		for(int i = 0; i < around.length; i++){
-			System.out.println("belt around: " + around[i][0] + ", " + around[i][1]);
-			Belt belt_around = beltGrid.get(around[i][0], around[i][1]);
+			System.out.println("direction of deleted belt from adjacent belt per: " + around[i][0] + ", " + around[i][1]);
+			Placeable_Belt belt_around = beltGrid.get_belt(around[i][0], around[i][1]);
+			
 			if(belt_around == null)
 				continue;
-			belts_whom_list_delete.add(belt_around);
-			if(belt_around.changed_shape()){
-				System.out.println("belt: "+belt_around.arrayIndex + " changed shape");
-				Belt[] belt_around_around = belt_around.getBeltsAround();
+			belt_around.belt.set_belts_around(beltGrid);
+			belts_whom_list_delete.add(belt_around.belt);
+			if(belt_around.belt.changed_shape()){
+				System.out.println("belt: "+belt_around.belt.arrayIndex + " changed shape");
+				Belt[] belt_around_around = belt_around.belt.getBeltsAround();
+				
+				
+				System.out.println("adding to line delete list: " + belt_around);
+				Belt new_belt = remake_belt(belt_around.belt);
+				belt_around.set(new_belt);
 				for(int j = 0; j < 4; j++){
 					if(belt_around_around[j] == null)
 						continue;
 					//if shape changed add around around to delete list
 					belts_whom_list_delete.add(belt_around_around[j]);
-					//System.out.println("adding to line delete list: " + belt_around_around[j]);
+					belt_around_around[j].set_belts_around(beltGrid);
+					System.out.println("adding to line delete list: " + belt_around_around[j]);
 				}
-				
-				//System.out.println("adding to line delete list: " + belt_around);
-				Belt new_belt = remake_belt(belt_around);
-				remove_belt_from_manager(belt_around, new_belt);
 			}
 			
 		}
 	}
 	private Belt remake_belt(Belt belt_around){
-		return Belt.makeBelt(beltGrid, belt_around.orientation, belt_around.getoAround(), belt_around.grid_row, belt_around.grid_column);
+		return Belt.makeBelt(beltGrid, belt_around.orientation, belt_around.grid_row, belt_around.grid_column);
+	}
+	public Placeable placeable_from_id(int id, int grid_row, int grid_column, int orientation){
+		Placeable building;
+		switch(id){
+			case add_belt_type_regular -> building = new Placeable_Belt(beltGrid, orientation, grid_row, grid_column);
+			case add_belt_type_balancer -> building = new Balancer(beltGrid, grid_row, grid_column, orientation);
+			default -> throw new RuntimeException();
+		}
+		return building;
 	}
 	private void belt_deleteOrAdd_procedure(int grid_row, int grid_column, int direction_new_belt){
-		//Main_Class.log.log_line("delete/add procedure: " + grid_column + ", " + grid_row);
-		//Main_Class.log.tab("delete/add");
 		//delete belt
 		//delete lists in belt and adjacent belts
 		//check for changed shape in all adjacent belts
 		//if changed, delete lists in adjacent belts of changed belt
-		Belt belt_delete = beltGrid.get(grid_row, grid_column);
-		Belt new_belt;
+		Placeable belt_delete = beltGrid.get_belt(grid_row, grid_column);
+		Placeable new_belt;
 		List<Belt> belts_whom_list_delete = new ArrayList<>();
 		int[][] around;
 		if(belt_delete != null){//delete old belt
-			belts_whom_list_delete.add(belt_delete);
-			remove_belt_from_manager(belt_delete, null);
+			Belt[] temp = belt_delete.get_belts();
+			for(int i = 0; i < temp.length; i++)
+				belts_whom_list_delete.add(temp[i]);
+			beltGrid.remove_from_manager(belt_delete);
 			System.out.println("checking around deleted belt");
 			around = belt_delete.get_affected_around();
 		}
 		else{//if empty add new_belt
-			new_belt = make_belt_from_map(grid_row, grid_column, direction_new_belt);
-			remove_belt_from_manager(null, new_belt);
+			new_belt = placeable_from_id(add_belt_type, grid_row, grid_column, direction_new_belt);
+			beltGrid.add_to_manager(new_belt);
+			//System.out.println("index 21: "+belts.get(21).belts_around);
 			System.out.println("checking around added belt");
 			around = new_belt.get_affected_around();
 		}
 		check_around_for_changed_shape(belts_whom_list_delete, around);
 		//System.out.println("deleting lists");
 		List<List<ItemLocationStruct>> itemToBeReplaced = delete_lists_of_belts(belts_whom_list_delete);
-		
+		//System.out.println("index 21: "+belts.get(21).belts_around);
 		List<Belt_List> new_lines = new ArrayList<>();
 		//System.out.println("rebuilding lists");
-		for(int i = 0; i < belts.size(); i++){
-			//System.out.println("checking belt: " + belts.get(i).arrayIndex + " index: " + i);
-			if(belts.get(i).get_list(0) == null){
-				Belt_List line = Belt_List_Factory.construct_belt_list(belts.get(i), 0, belt_lists);
+		for(int i = 0; i < beltGrid.belts.size(); i++){
+			System.out.println("checking belt: " + beltGrid.belts.get(i).arrayIndex + " index: " + i);
+			if(beltGrid.belts.get(i).get_list(0) == null){
+				Belt_List line = Belt_List_Factory.construct_belt_list(beltGrid.belts.get(i), 0, belt_lists);
 				new_lines.add(line);
 				belt_lists.add(line);
 			}
 			
-			if(belts.get(i).get_list(1) == null){
-				Belt_List line = Belt_List_Factory.construct_belt_list(belts.get(i), 1, belt_lists);
+			if(beltGrid.belts.get(i).get_list(1) == null){
+				Belt_List line = Belt_List_Factory.construct_belt_list(beltGrid.belts.get(i), 1, belt_lists);
 				new_lines.add(line);
 				belt_lists.add(line);
 			}
@@ -490,12 +508,38 @@ public class Manager {
 			for(int j = 0; j < list_temp.size(); j++){
 				System.out.println("adding back item: ");
 				ItemLocationStruct item = list_temp.get(j);
-				if(!belts.contains(item.belt))
+				if(!beltGrid.belts.contains(item.belt))
 					continue;
 				add_item_to_list(item.belt, item.position, item.side);
 			}
 		}
-		//Main_Class.log.untab("delete/add");
+		
+		int[][]  cords = {
+				{1, 1},
+				{1, 2},
+				{2, 1},
+				{2, 2}
+		};
+		for(int i = 0; i < cords.length; i++){
+			Placeable building = beltGrid.get(cords[i][0], cords[i][1]);
+			if(building == null)
+				continue;
+			System.out.println("building at: " + building.get_row() + ", " + building.get_column());
+			Belt[] belts = building.get_belts();
+			for(int j = 0; j < belts.length; j++){
+				System.out.print("belt: " +belts[j]+"    ");
+				Belt[] around_temp = belts[j].belts_around;
+				for(int around_index = 0; around_index < around_temp.length; around_index++){
+					if(around_temp[around_index] == null){
+						System.out.print("<null>, ");
+						continue;
+					}
+					
+					System.out.print("<"+around_temp[around_index]+">, ");
+				}
+				System.out.println();
+			}
+		}
 	}
 	private List<List<ItemLocationStruct>> delete_lists_of_belts(List<Belt> belts){
 		List<List<ItemLocationStruct>> itemToBeReplaced = new ArrayList<>();
@@ -559,7 +603,7 @@ public class Manager {
 		
 		
 		
-		BufferedImage ghost = new BufferedImage(64 * (space_taken[1] + 1), 64 * (space_taken[0] + 1), BufferedImage.TYPE_INT_ARGB);
+		BufferedImage ghost = new BufferedImage(64 * (space_taken[1] + 1) - cameraX, 64 * (space_taken[0] + 1) - cameraY, BufferedImage.TYPE_INT_ARGB);
 		//BufferedImage ghost = new BufferedImage(128, 64 * (space_taken[0] + 1), BufferedImage.TYPE_INT_ARGB);
 		
 		Graphics2D ghost_grf = (Graphics2D) ghost.getGraphics();
@@ -568,7 +612,7 @@ public class Manager {
 		if(add_belt_type == add_belt_type_regular){
 			if(beltGrid.has(grid_row, grid_column))
 				return;
-			Belt belt = Belt.makeBelt(beltGrid, rotation, new int[]{-1,-1,-1,-1}, grid_row, grid_column);
+			Belt belt = Belt.makeBelt(rotation, new int[]{-1,-1,-1,-1}, grid_row, grid_column);
 			ghost_grf.drawImage(belt.image, 0, 0, null);
 			ghost = Images.setAlpha(ghost, 128);
 			grf.drawImage(ghost, belt.x, belt.y, null);
@@ -598,8 +642,11 @@ public class Manager {
 		return false;
 	}
 	public void draw(Graphics2D grf, int graphical_iteration){
+		//BufferedImage image = new BufferedImage(screen.getWidth(), screen.getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
+		
 		//Main_Class.log.log_line("drawing belts");
 		//Main_Class.log.tab("drawing belts");
+		//Graphics2D image_grf = image.createGraphics();
 		draw_belts(grf);
 		//Main_Class.log.untab("drawing belts");
 		//Main_Class.log.log_line("drawing belt lines");
@@ -612,6 +659,8 @@ public class Manager {
 		//Main_Class.log.untab("drawing items in list");
 		//Main_Class.log.log_line("drawing ghost");
 		//Main_Class.log.tab("drawing ghost");
+		
+		//grf.drawImage(image, 400, 0, null);
 		if(touching_belt_layer)
 			draw_belt_ghost(grf);
 		//Main_Class.log.untab("drawing ghost");
@@ -623,7 +672,7 @@ public class Manager {
 	}
 	private void draw_belt_lines(Graphics2D grf){
 		//System.out.println("manager drawing lines");
-		Color[] colors = {Color.BLUE, Color.CYAN, Color.RED, Color.GREEN};
+		Color[] colors = {Color.BLUE, Color.CYAN, Color.RED, Color.GREEN, Color.yellow, Color.BLACK, Color.ORANGE};
 		for(int i = 0; i < belt_lists.size(); i++){
 			belt_lists.get(i).draw_line(grf, colors[i% colors.length]);
 		}
@@ -638,7 +687,7 @@ public class Manager {
 	}
 	private void draw_locations_on_curveToRight(Graphics grf){
 		grf.setColor(Color.black);
-		Belt belt = belts.get(0);
+		Belt belt = beltGrid.belts.get(0);
 		int item_size = 16;
 		int block_size = 2;
 		int items_per_side = 4;
@@ -675,10 +724,12 @@ public class Manager {
 	}
 	private void draw_belts(Graphics2D grf){
 		Balancer balancer = new Balancer(beltGrid, 8, 5, 1);
-		grf.drawImage(balancer.image, balancer.x, balancer.y, null);
+		grf.drawImage(balancer.image, balancer.x - cameraX, balancer.y - cameraY, null);
 		
-		for(int i = 0; i < belts.size(); i++){
-			draw_belt(grf, belts.get(i), false);
+		for(int i = 0; i < beltGrid.belts.size(); i++){
+			if(beltGrid.belts.get(i) instanceof Belt_In_Balancer)
+				continue;
+			draw_belt(grf, beltGrid.belts.get(i), false);
 		}
 	}
 	
@@ -817,12 +868,12 @@ public class Manager {
 		for(int i = 0; i < belt_lists.size(); i++){
 			System.out.println(""+belt_lists.get(i));
 		}
-		System.out.println("belts: "+belts.size()+" ~~~~~~~~~~~~~~~~~~~~");
-		for(int i = 0; i < belts.size(); i++){
-			System.out.println(""+belts.get(i));
+		System.out.println("belts: "+beltGrid.belts.size()+" ~~~~~~~~~~~~~~~~~~~~");
+		for(int i = 0; i < beltGrid.belts.size(); i++){
+			System.out.println(""+beltGrid.belts.get(i));
 			for(int j = 0; j < 4; j++){
-				if(belts.get(i).beltsAround(j) != null)
-					System.out.print(belts.get(i).beltsAround(j).arrayIndex + ", ");
+				if(beltGrid.belts.get(i).beltsAround(j) != null)
+					System.out.print(beltGrid.belts.get(i).beltsAround(j).arrayIndex + ", ");
 				else
 					System.out.print("N, ");
 			}

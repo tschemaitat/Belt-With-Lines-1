@@ -1,6 +1,7 @@
 package New_Belt_Package;
 
 import Main_and_Drawing.*;
+import Main_and_Drawing.Layouts.KeyEvent_Edited;
 import New_Belt_Package.*;
 
 import java.awt.*;
@@ -19,11 +20,11 @@ public class Main_Class {
 //		log.log_line("hello3");
 		belt_game();
 	}
-	
+	public static Manager manager;
 	public static void belt_game(){
 		//customize_print();
-		Screen screen = new Screen(800, 800);
-		Manager manager = new Manager(screen.get_parent_layout(), screen);
+		Screen screen = new Screen(1300, 800);
+		manager = new Manager(screen.get_parent_layout(), screen);
 		Graphics2D grf =  (Graphics2D)screen.get_graphics();
 		RenderingHints qualityHints = new RenderingHints(
 				RenderingHints.KEY_ANTIALIASING,
@@ -71,36 +72,39 @@ public class Main_Class {
 			
 			
 			if(tick%4 == 0){
-				if(!first_tab){
-					//log.untab("tick");
-					if(tick%40 == 0 && tick != 0){
-						//log.untab("10 ticks");
-						//log.log_line("10 ticks: " + tick);
-						//log.tab("10 ticks");
-					}
-				}else
-					first_tab = false;
-				
-				//log.log_line("tick: " + tick);
-				//log.tab("tick");
 				manager.iterate_belt_lists();
 			}
-			
-			//log.log_line("click tick: " + tick);
-			//log.tab("click tick");
 			screen.pop_mouse_event_to_observe();
-			//log.untab("click tick");
+			
 			screen.observe_mouse_touch();
+			
+			while(screen.has_keyboard()){
+				use_keyboard(screen.pop_keyboard());
+			}
 			
 			int iteration_into_tick = tick%4;//0,1,2,3
 			int graphical_iteration = (4-1) - iteration_into_tick;
 			manager.graphical_iteration = graphical_iteration;
 			
 			screen.update_screen();
-			
+			manager.do_graphical_tick();
 			//grf.drawImage(buffer, 0, 32, null);
 			tick++;
 		}
+	}
+	
+	public static void use_keyboard(KeyEvent_Edited event){
+		System.out.println("processing key");
+		char input = event.character();
+		if(event.pressed){
+			manager.key_down = true;
+			manager.key_that_is_down = input;
+		}
+		else{
+			if(input == manager.key_that_is_down)
+				manager.key_down = false;
+		}
+		
 	}
 	
 	static int items_per_side = 4;

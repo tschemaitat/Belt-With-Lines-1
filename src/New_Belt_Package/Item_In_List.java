@@ -22,6 +22,6 @@ public class Item_In_List {
 	}
 	
 	public void draw(Graphics2D grf, int x, int y){
-		grf.drawImage(image, x, y, null);
+		grf.drawImage(image, x - Manager.cameraX, y - Manager.cameraY, null);
 	}
 }
