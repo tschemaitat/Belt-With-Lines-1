@@ -1,0 +1,26 @@
+Placeable
+	Placable_belt
+	Balancer
+
+Belt
+	defines the belt image
+	defines coordinates of items (hold 16 items)
+	linked 4 belts around it
+	logic
+		what shape am I?
+		in back is there an input, are they my priority?
+	CurveToRight, CurveToLeft, Straight, Balancer_Belt inherit it
+Balancer
+	takes up 1x2 space
+	holds 4 Balancer_Belt's
+		they connect to eachother and then to the 4 belts around the balancer
+		balancer_belts act like belts and can be put into a list but are smaller
+List
+	construction
+		takes belt as input, looks forward and backward to get a list of item positions
+		when it has all the positions, it saves the coordinates and belts they come from
+		at the end, it connects with other lists if there is an output
+	iterate
+		moves items forward, if it is blocked by forward list it can access it to push items forward
+	printing
+		it stores the belts that the position, when drawing an item, it can access those coordinates
