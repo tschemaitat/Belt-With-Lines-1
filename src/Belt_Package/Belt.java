@@ -262,7 +262,7 @@ abstract public class Belt{
         }
         
     }
-    protected int shiftItemCord(int xy, int x, int y){
+    protected int shiftItemCord(int xy, int x, int y){//if xy == 0 we want the x value, else we want the y value
         if(xy == 0)
             return this.x + xMatrix[orientation][0] * x + xMatrix[orientation][1] * y + rotateOffsetMatrix[orientation][0] * 64 - 16;
         return this.y + yMatrix[orientation][0] * x + yMatrix[orientation][1] * y + rotateOffsetMatrix[orientation][1] * 64 - 16;

@@ -3,6 +3,7 @@ package Main_and_Drawing;
 import Main_and_Drawing.Layouts.RectP;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 
 public class Stack_Layout extends Layout {
     
@@ -11,14 +12,18 @@ public class Stack_Layout extends Layout {
     }
     
     protected void draw_custom(Graphics2D grf){
-        if(list.size() == 0)
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
+        Graphics2D children_grf = image.createGraphics();
+        if(list.isEmpty())
             return;
         for(int i = 0; i < list.size(); i++){
             Twod obj = list.get(i);
             if(obj.visibility == VISIBLE)
-                obj.draw(grf);
+                obj.draw(children_grf);
             //obj.drawBounds(grf);
         }
+
+        grf.drawImage(image, x, y, null);
     }
     
     public boolean observe(MouseEvent_Edited event){

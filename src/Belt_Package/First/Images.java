@@ -26,7 +26,7 @@ public class Images {
     
     public static BufferedImage iron;
 
-    public static void loadSprites(){
+    static{
         BufferedImage temp;
         temp = downloadImage("png_images/belt.png");
         

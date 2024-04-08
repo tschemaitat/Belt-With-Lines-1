@@ -66,7 +66,7 @@ public class Entity_Manager {
 		this.screen = screen;
 		main_dude = this;
 		this.layout = layout;
-		Images.loadSprites();
+		//Images.loadSprites();
 		beltGrid = new BeltGrid();
 		createBelts();
 		create_UI();
